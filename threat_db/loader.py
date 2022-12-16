@@ -143,7 +143,7 @@ def process_vex_file(client, jsonf):
                 metadata,
                 components,
                 vulnerabilities,
-            ) = get_pkg_vulns_from_bom(json.loads(jsonf.read()))
+            ) = get_pkg_vulns_from_bom(orjson.loads(jsonf.read()))
         except Exception as ex:
             LOG.warn("Exception while converting to json from tempfile")
             LOG.exception(ex)

@@ -27,3 +27,6 @@ ignore_directories = [
     "mock",
     "mocks",
 ]
+
+# JWT expiry period - 90 days
+JWT_ACCESS_TOKEN_EXPIRES_HOURS = 90 * 24

@@ -15,4 +15,4 @@ RUN poetry install --no-cache --without dev \
     && rm -rf /var/lib/apt/lists/*
 EXPOSE 8000
 USER threat_db
-CMD ["uwsgi", "--http-socket", ":8000", "--uid", "1000", "--wsgi-file", "threat_db/api.py", "--callable", "app", "--master", "--thunder-lock", "--processes", "2"]
+CMD ["uwsgi", "--http-socket", ":8000", "--uid", "1000", "--wsgi-file", "threat_db/api.py", "--callable", "app", "--master", "--thunder-lock", "--processes", "4"]

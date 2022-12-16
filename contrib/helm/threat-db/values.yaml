@@ -7,9 +7,9 @@ replicaCount: 1
 image: &image
   registry: ghcr.io
   repository: ngcloudsec/threat-db
-  pullPolicy: IfNotPresent
+  pullPolicy: Always
   # Overrides the image tag whose default is the chart appVersion.
-  tag: latest
+  tag: main
 
 imagePullSecrets: []
 nameOverride: ""
@@ -26,11 +26,12 @@ serviceAccount:
 
 podAnnotations: {}
 
-podSecurityContext: {}
-  # fsGroup: 2000
+podSecurityContext:
+  enabled: false
+  fsGroup: 1001
+  runAsUser: 1001
 
 securityContext:
-  enabled: false
   capabilities:
     drop:
     - ALL
@@ -64,33 +65,25 @@ resources: {}
   #   memory: 128Mi
 
 startupProbe:
-  enabled: false
-  port: 8000
-  path: /healthcheck
-  periodSeconds: 10
-  timeoutSeconds: 5
-  failureThreshold: 6
-  successThreshold: 1
+  httpGet:
+    path: /healthcheck
+    port: http
+  initialDelaySeconds: 30
+  periodSeconds: 30
 
 livenessProbe:
-  enabled: false
-  port: 8000
-  path: /healthcheck
-  initialDelaySeconds: 15
-  periodSeconds: 10
-  timeoutSeconds: 5
-  failureThreshold: 6
-  successThreshold: 1
+  httpGet:
+    path: /healthcheck
+    port: http
+  initialDelaySeconds: 30
+  periodSeconds: 60
 
 readinessProbe:
-  enabled: false
-  port: 8000
-  path: /healthcheck
-  initialDelaySeconds: 15
-  periodSeconds: 10
-  timeoutSeconds: 5
-  failureThreshold: 6
-  successThreshold: 1
+  httpGet:
+    path: /healthcheck
+    port: http
+  initialDelaySeconds: 60
+  periodSeconds: 30
 
 autoscaling:
   enabled: false
@@ -104,3 +97,14 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+env:
+  DGRAPH_GRAPHQL_HOST: http://dev-db-dgraph-alpha:8080/graphql
+  DGRAPH_RPC_HOST: dev-db-dgraph-alpha:9080
+  THREATDB_TMP_DIR: /tmp
+
+persistence:
+  accessModes:
+    - ReadWriteOnce
+  storageClass: "-"
+  size: 1Gi

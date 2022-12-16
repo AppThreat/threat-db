@@ -11,6 +11,7 @@ services:
       - DGRAPH_GRAPHQL_HOST=${DGRAPH_GRAPHQL_HOST:-http://dgraph-standalone:8080/graphql}
       - DGRAPH_RPC_HOST=${DGRAPH_RPC_HOST:-dgraph-standalone:9080}
       - DGRAPH_API_KEY=${DGRAPH_API_KEY}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
       - THREATDB_DATA_DIR=/data/import
   dgraph-standalone:
     image: dgraph/standalone:v22.0.1

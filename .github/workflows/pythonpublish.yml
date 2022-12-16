@@ -4,8 +4,9 @@ on:
   push:
     branches:
       - main
+      - feature/*
     tags:
-      - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
+      - 'v*'
   workflow_dispatch:
 
 env:
@@ -18,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -32,6 +33,15 @@ jobs:
         run: |
           poetry install --no-cache --without dev
           poetry publish --build
+      - name: Release Helm package
+        run: |
+          cd contrib/helm/threat-db
+          echo ${{ secrets.GITHUB_TOKEN }} | helm registry login -u ${GITHUB_USERNAME} --password-stdin ghcr.io/ngcloudsec/charts
+          helm package .
+          helm push threat-db-*.tgz oci://ghcr.io/ngcloudsec/charts
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_USERNAME: ${{ github.actor }}
       - name: Create Release
         id: create_release
         if: startsWith(github.ref, 'refs/tags/')

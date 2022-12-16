@@ -24,6 +24,7 @@ classifiers = [
 
 [tool.poetry.scripts]
 threat_db = 'threat_db.cli:main'
+threat_db_admin = 'threat_db.admincli:main'
 
 [tool.poetry.dependencies]
 python = ">=3.7,<3.11"
@@ -36,6 +37,8 @@ gql = {extras = ["all"], version = "^3.4.0"}
 flask = "^2.2.2"
 uwsgi = "^2.0.21"
 orjson = "^3.8.3"
+itsdangerous = "^2.1.2"
+flask-jwt-extended = "^4.4.4"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.1.2"

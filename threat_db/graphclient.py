@@ -9,13 +9,22 @@ from gql.dsl import DSLMutation, DSLSchema, dsl_gql
 from gql.transport.exceptions import TransportQueryError
 from gql.transport.requests import RequestsHTTPTransport
 from gql.transport.requests import log as requests_logger
+from gql.transport.websockets import WebsocketsTransport
+from gql.transport.websockets import log as websockets_logger
+from graphql import ExecutionResult
 from urllib3.exceptions import MaxRetryError
 
 from threat_db.logger import LOG, WARNING
-from threat_db.queries import drop_all_query, health_query, introspect_query
+from threat_db.queries import (
+    auth_user_query,
+    drop_all_query,
+    health_query,
+    introspect_query,
+)
 from threat_db.schema import graphql_schema
 
 requests_logger.setLevel(WARNING)
+websockets_logger.setLevel(WARNING)
 
 headers = {"Content-Type": "application/json", "Accept-Encoding": "gzip"}
 
@@ -52,15 +61,16 @@ def catch_db_errors(fn):
                         LOG.info("Retrying failed mutation")
                         return fn(*args, **kwargs)
                 except Exception as e:
-                    print(e)
+                    LOG.exception(e)
         except Exception as ex:
             LOG.exception(ex)
 
     return caller
 
 
-def process_query_response(res):
-    json_resp = res.json()
+def process_query_response(json_resp):
+    if isinstance(json_resp, ExecutionResult):
+        return {"data": json_resp.data, "errors": json_resp.errors}
     if isinstance(json_resp, dict) and json_resp.get("errors"):
         errors = json_resp.get("errors")
         if len(errors):
@@ -73,7 +83,7 @@ def process_query_response(res):
         return json_resp.get("errors")
     elif isinstance(json_resp, list):
         return json_resp
-    return json_resp.get("data")
+    return json_resp
 
 
 # Drop All - discard all data and start from a clean slate.
@@ -82,7 +92,7 @@ def drop_all(client, host):
         host = host.replace("/graphql", "") + "/alter"
     res = requests.post(host, data=drop_all_query, headers=headers)
     if res.ok:
-        return process_query_response(res)
+        return process_query_response(res.json())
     LOG.warn(f"Drop all data failed due to {res.status_code} {host}")
     return None
 
@@ -92,7 +102,7 @@ def healthcheck(client, host):
         host = host.replace("/graphql", "") + "/health"
     res = requests.post(host, data=health_query, headers=headers)
     if res.ok:
-        return process_query_response(res)
+        return process_query_response(res.json())
     LOG.warn(f"Unable to perform healthcheck due to {res.status_code} {host}")
     return None
 
@@ -130,7 +140,7 @@ def create_schemas(client, host):
             host = host.replace("/graphql", "") + "/admin/schema"
         res = requests.post(host, data=graphql_schema, headers=headers)
         if res.ok:
-            return process_query_response(res)
+            return process_query_response(res.json())
         LOG.warn(f"Create schema failed due to {res.status_code} {host}")
         return None
     else:
@@ -150,7 +160,7 @@ def create_bom(client, bom):
             )
         )
         result = session.execute(query)
-        return result
+        return process_query_response(result)
 
 
 @catch_db_errors
@@ -167,7 +177,7 @@ def create_components(client, components):
             )
         )
         result = session.execute(query)
-        return result
+        return process_query_response(result)
 
 
 @catch_db_errors
@@ -186,7 +196,45 @@ def create_vulns(client, vulns):
             )
         )
         result = session.execute(query)
-        return result
+        return process_query_response(result)
+
+
+@catch_db_errors
+def create_user(client, users):
+    with client as session:
+        ds = DSLSchema(client.schema)
+        query = dsl_gql(
+            DSLMutation(
+                ds.Mutation.addUser(input=users, upsert=True).select(
+                    ds.AddUserPayload.user.select(
+                        ds.User.id, ds.User.created, ds.User.disabled
+                    )
+                )
+            )
+        )
+        result = session.execute(query)
+        return process_query_response(result)
+
+
+@catch_db_errors
+def auth_user(client, user_id, password):
+    with client as session:
+        query = gql(auth_user_query)
+        result = session.execute(
+            query, variable_values={"user_id": user_id, "password": password}
+        )
+        if result.get("checkUserPassword"):
+            return True
+    return False
+
+
+def raw_execute(client, user_query):
+    with client as session:
+        q = user_query.get("query")
+        query = gql(q)
+        variables = user_query.get("variables", {})
+        result = session.execute(query, variable_values=variables)
+        return process_query_response(result)
 
 
 def get(host, api_key=None):
@@ -194,6 +242,17 @@ def get(host, api_key=None):
         host = f"{host}/graphql"
     if api_key:
         headers["Authorization"] = api_key
-    transport = RequestsHTTPTransport(url=host, verify=True, headers=headers, retries=3)
-    client = Client(transport=transport, fetch_schema_from_transport=True)
+    client = None
+    # if host.startswith("https"):
+    #     wss_host = host.replace("https://", "wss://")
+    #     try:
+    #         transport = WebsocketsTransport(url=wss_host)
+    #         client = Client(transport=transport, fetch_schema_from_transport=True)
+    #     except Exception as ex:
+    #         print(ex)
+    if not client:
+        transport = RequestsHTTPTransport(
+            url=host, verify=True, headers=headers, retries=3
+        )
+        client = Client(transport=transport, fetch_schema_from_transport=True)
     return transport, client

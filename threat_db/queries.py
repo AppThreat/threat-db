@@ -29,3 +29,12 @@ health_query = """
         }
     }
 """
+
+auth_user_query = """
+    query ($user_id: String!, $password: String!) {
+        checkUserPassword(id: $user_id, password: $password) {
+            id
+            email
+        }
+    }
+"""

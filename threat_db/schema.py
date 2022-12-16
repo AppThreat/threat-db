@@ -1,11 +1,12 @@
 graphql_schema = """
-type User {
+type User @secret(field: "password") {
     id: String! @id
     email: String! @search(by: [term])
     fullName: String! @search(by: [term, fulltext])
     created: DateTime
     modified: DateTime
     teams: [Team]
+    roles: [UserRole]
     disabled: Boolean
 }
 type Team {
@@ -19,7 +20,17 @@ type Team {
     modified: DateTime
     disabled: Boolean
 }
+type UserRole {
+    id: String! @id
+    user: User!
+    team: Team!
+    role: String!
+    created: DateTime
+    modified: DateTime
+    disabled: Boolean
+}
 type ScanResult {
+    id: String! @id
     scan: Scan
     created: DateTime
     validUntil: DateTime
