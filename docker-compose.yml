@@ -1,0 +1,24 @@
+version: "3.9"
+services:
+  web:
+    build: .
+    ports:
+      - "9000:8000"
+    volumes:
+      - .:/app
+      - $HOME/threatdb_data_dir:/data/import
+    environment:
+      - DGRAPH_GRAPHQL_HOST=${DGRAPH_GRAPHQL_HOST:-http://dgraph-standalone:8080/graphql}
+      - DGRAPH_RPC_HOST=${DGRAPH_RPC_HOST:-dgraph-standalone:9080}
+      - DGRAPH_API_KEY=${DGRAPH_API_KEY}
+      - THREATDB_DATA_DIR=/data/import
+  dgraph-standalone:
+    image: dgraph/standalone:v22.0.1
+    volumes:
+      - $HOME/dgraph:/dgraph
+    ports:
+      - 5080:5080
+      - 6080:6080
+      - 8080:8080
+      - 9080:9080
+      - 8000:8000
