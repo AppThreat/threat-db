@@ -1,0 +1,7 @@
+apiVersion: v1
+data:
+  DGRAPH_GRAPHQL_HOST: {{ .Values.env.DGRAPH_GRAPHQL_HOST }}
+  DGRAPH_RPC_HOST: {{ .Values.env.DGRAPH_RPC_HOST }}
+kind: ConfigMap
+metadata:
+  name: config-map

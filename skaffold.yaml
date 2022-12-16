@@ -1,0 +1,17 @@
+apiVersion: skaffold/v3
+kind: Config
+metadata:
+  name: threat-db
+build:
+  artifacts:
+  - image: ngcloudsec/threat-db
+    docker:
+      dockerfile: Dockerfile
+deploy:
+  helm:
+    releases:
+    - name: threat-db
+      chartPath: contrib/helm/threat-db
+      valuesFiles:
+      - contrib/helm/threat-db/values.yaml
+      version: 0.2.0
