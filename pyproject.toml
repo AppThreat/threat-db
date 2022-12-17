@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "threat-db"
-version = "0.1.0"
+version = "0.2.0"
 description = "A graphql server for vulnerabilities powered by dgraph"
 authors = ["Team ngcloudsec <cloud@ngcloud.io>"]
 license = "Apache-2.0"

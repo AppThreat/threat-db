@@ -14,4 +14,4 @@ deploy:
       chartPath: contrib/helm/threat-db
       valuesFiles:
       - contrib/helm/threat-db/values.yaml
-      version: 0.1.0
+      version: 0.2.0
