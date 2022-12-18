@@ -91,7 +91,7 @@ EOF
 
 ## Installing dgraph server via helm
 
-Create an helm values file called `dgraph-values.yaml` with your dgraph [configuration](https://github.com/dgraph-io/charts/blob/master/charts/dgraph/values.yaml). Use the below configuration as an example and customize the domain names and whitelist IPs based on your needs.
+Create an helm values file called `dgraph-values.yaml` with your dgraph [configuration](https://github.com/dgraph-io/charts/blob/master/charts/dgraph/values.yaml). Use the below configuration as an example and customize the security token, domain names and whitelist IPs based on your needs.
 
 ```
 # dgraph-values.yaml
@@ -397,3 +397,4 @@ Check pod limits
 microk8s kubectl get pods dev-db-dgraph-zero-0 -o jsonpath='{range .spec.containers[*]}{"Container Name: "}{.name}{"\n"}{"Requests:"}{.resources.requests}{"\n"}{"Limits:"}{.resources.limits}{"\n"}{end}'
 ```
 
+````

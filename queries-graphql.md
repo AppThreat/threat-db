@@ -384,3 +384,21 @@ subscription subscribeVulnerability {
   }
 }
 ```
+
+Find BoMs between two dates
+
+```
+query {
+  queryBom @cascade {
+    serialNumber
+    metadata(filter: {timestamp: {between: {min: "2022-12-12", max: "2022-12-19"}}}) {
+      timestamp
+      component {
+        purl
+        name
+        group
+      }
+    }
+  }
+}
+```
