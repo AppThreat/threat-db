@@ -53,7 +53,7 @@ Description of the team
 """
     description: String @search(by: [term, fulltext])
 """
-List of tags
+List of custom tags
 """
     tags: [String]
 """
@@ -115,7 +115,7 @@ Is this role disabled?
 """
 Results from a scan
 """
-type ScanResult {
+type ScanResult @withSubscription {
 """
 Unique ID such as UUID or ULID
 """
@@ -245,7 +245,7 @@ Description of the environment for search
 """
     description: String @search(by: [term, fulltext])
 """
-List of tags
+List of custom tags
 """
     tags: [String]
 """
@@ -287,7 +287,7 @@ VCS Commit Hash
 """
 Represents an application
 """
-type Application {
+type Application @withSubscription {
 """
 Unique ID such as UUID or ULID
 """
@@ -341,7 +341,7 @@ List of custom classification
 """
     classification: [String]
 """
-List of tags
+List of custom tags
 """
     tags: [String]
 """
@@ -492,10 +492,14 @@ List of dependency
 List of BoM this component appears in
 """
     appearsIn: [Bom] @hasInverse(field: components)
+"""
+List of custom tags
+"""
+    tags: [String]
 }
 
 """
-BoM service
+BoM service data
 """
 type BomServiceData {
 """
@@ -801,7 +805,7 @@ Details for the state
 """
 Vulnerability type
 """
-type Vulnerability {
+type Vulnerability @withSubscription {
 """
 Unique reference within a BoM
 """
@@ -866,4 +870,8 @@ List of properties
 Vulnerability detail
 """
     detail: VulnerabilityDetail @hasInverse(field: vulnerability)
+"""
+List of custom tags
+"""
+    tags: [String]
 }
