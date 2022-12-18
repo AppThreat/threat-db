@@ -335,3 +335,40 @@ query {
   }
 }
 ```
+
+Components with critical and high exploitable vulnerabilities
+
+```
+query {
+  queryComponent(first:10) @cascade {
+    name
+    group
+    version
+    purl
+    appearsIn {
+      serialNumber
+      metadata {
+        component {
+          purl
+          name
+        }
+      }
+    }
+    vulnerabilities(filter: {
+        has: properties,
+        and: {severity: {in: [critical, high]}}
+      }) {
+      id
+      severity
+      cvss_score
+      description
+      version
+      fix_version
+      analysis(filter: {state: {allofterms: "exploitable"}}) {
+        state
+        detail
+      }
+    }
+  }
+}
+```

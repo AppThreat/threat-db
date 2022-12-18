@@ -200,7 +200,7 @@ dev-db-dgraph-zero             ClusterIP   10.152.183.112   <none>        5080/T
 
 ```
 # microk8s helm uninstall threat-db-api
-microk8s helm install threat-db-api oci://ghcr.io/ngcloudsec/charts/threat-db --version 0.2.0 --set persistence.storageClass="ssd-hostpath" --set persistence.size="1Gi"
+microk8s helm install threat-db-api oci://ghcr.io/ngcloudsec/charts/threat-db --version 0.3.0 --set persistence.storageClass="ssd-hostpath" --set persistence.size="1Gi"
 microk8s kubectl get pods
 ```
 

@@ -21,7 +21,11 @@ from threat_db.queries import (
     health_query,
     introspect_query,
 )
-from threat_db.schema import graphql_schema
+
+# GraphQL schema
+graphql_schema = open(
+    os.path.join(os.path.dirname(__file__), "base-schema.graphql")
+).read()
 
 requests_logger.setLevel(WARNING)
 websockets_logger.setLevel(WARNING)
@@ -45,23 +49,24 @@ def catch_db_errors(fn):
         try:
             return fn(*args, **kwargs)
         except requests.exceptions.ConnectionError:
-            LOG.warn("GraphQL API is unavailable")
+            LOG.warn(
+                "GraphQL API is unavailable. Please contact the API provider for support."
+            )
         except MaxRetryError:
-            LOG.warn("GraphQL and admin API are currently unavailable")
+            LOG.warn("GraphQL and admin API are currently unavailable.")
         except TransportQueryError as tqe:
             if tqe.errors:
                 first_error = tqe.errors[0].get("message", "")
-                try:
-                    # dgraph doesn't support multiple concurrent mutations. So we workaround by retrying
-                    # See https://discuss.dgraph.io/t/transactions-in-graphql/6861
-                    if (
-                        "couldn't commit transaction" in first_error
-                        and "Please retry" in first_error
-                    ):
-                        LOG.info("Retrying failed mutation")
-                        return fn(*args, **kwargs)
-                except Exception as e:
-                    LOG.exception(e)
+                # dgraph doesn't support multiple concurrent mutations. So we workaround by retrying
+                # See https://discuss.dgraph.io/t/transactions-in-graphql/6861
+                if (
+                    "couldn't commit transaction" in first_error
+                    and "Please retry" in first_error
+                ):
+                    LOG.info("Retrying failed mutation")
+                    return fn(*args, **kwargs)
+                else:
+                    raise tqe
         except Exception as ex:
             LOG.exception(ex)
 
@@ -154,12 +159,32 @@ def create_bom(client, bom):
         ds = DSLSchema(client.schema)
         query = dsl_gql(
             DSLMutation(
-                ds.Mutation.addBom(input=bom, upsert=True).select(
+                ds.Mutation.addBom(input=bom, upsert=False).select(
                     ds.AddBomPayload.bom.select(ds.Bom.serialNumber)
                 )
             )
         )
-        result = session.execute(query)
+        try:
+            result = session.execute(query)
+        except TransportQueryError as tqe:
+            if tqe.errors:
+                first_error = tqe.errors[0].get("message", "")
+                if "duplicate XID found" in first_error:
+                    LOG.debug(
+                        "Some components in this BoM were also found in another BoM"
+                    )
+                    return None
+                elif (
+                    "already exists for field serialNumber inside type Bom"
+                    in first_error
+                ):
+                    LOG.warn(
+                        "BoM is immutable therefore duplicate submissions are not allowed."
+                    )
+                    return None
+                else:
+                    LOG.exception(tqe)
+                    return None
         return process_query_response(result)
 
 
@@ -252,7 +277,7 @@ def get(host, api_key=None):
     #         print(ex)
     if not client:
         transport = RequestsHTTPTransport(
-            url=host, verify=True, headers=headers, retries=3
+            url=host, verify=True, headers=headers, retries=1
         )
         client = Client(transport=transport, fetch_schema_from_transport=True)
     return transport, client

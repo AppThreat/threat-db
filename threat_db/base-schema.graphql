@@ -1,0 +1,869 @@
+"""
+User
+"""
+type User @secret(field: "password") {
+"""
+Unique ID such as UUID or ULID
+"""
+    id: String! @id
+"""
+Email
+"""
+    email: String! @search(by: [term])
+"""
+Full name
+"""
+    fullName: String! @search(by: [term, fulltext])
+"""
+Creation date
+"""
+    created: DateTime! @search
+"""
+Modified date
+"""
+    modified: DateTime! @search
+"""
+List of teams
+"""
+    teams: [Team]
+"""
+List of roles
+"""
+    roles: [UserRole]
+"""
+Is this user account disabled?
+"""
+    disabled: Boolean
+}
+
+"""
+Team
+"""
+type Team {
+"""
+Unique ID such as UUID or ULID
+"""
+    id: String! @id
+"""
+Team name
+"""
+    name: String! @search(by: [term])
+"""
+Description of the team
+"""
+    description: String @search(by: [term, fulltext])
+"""
+List of tags
+"""
+    tags: [String]
+"""
+List of users
+"""
+    users: [User] @hasInverse(field: teams)
+"""
+List of applications
+"""
+    applications: [Application] @hasInverse(field: teams)
+"""
+Creation date
+"""
+    created: DateTime! @search
+"""
+Modified date
+"""
+    modified: DateTime! @search
+"""
+Is this team disabled?
+"""
+    disabled: Boolean
+}
+
+"""
+Roles assigned to a user
+"""
+type UserRole {
+"""
+Unique ID such as UUID or ULID
+"""
+    id: String! @id
+"""
+User
+"""
+    user: User!
+"""
+Team
+"""
+    team: Team!
+"""
+Role string. Example: administrator, developer, security
+"""
+    role: String!
+"""
+Creation date
+"""
+    created: DateTime
+"""
+Modified date
+"""
+    modified: DateTime
+"""
+Is this role disabled?
+"""
+    disabled: Boolean
+}
+
+"""
+Results from a scan
+"""
+type ScanResult {
+"""
+Unique ID such as UUID or ULID
+"""
+    id: String! @id
+"""
+Scan that created this result
+"""
+    scan: Scan
+"""
+Creation date
+"""
+    created: DateTime! @search
+"""
+Optional, validity for result before it is considered stale
+"""
+    validUntil: DateTime
+"""
+List of SBoM used for the scan
+"""
+    bom: [Bom]
+"""
+List of components scanned
+"""
+    components: [Component]
+"""
+List of vulnerabilities identified
+"""
+    vulnerabilities: [Vulnerability]
+"""
+List of prioritized components
+"""
+    prioritizedComponents: [Component]
+"""
+List of prioritized vulnerabilities
+"""
+    prioritizedVulnerabilities: [Vulnerability]
+"""
+List of exploitable components
+"""
+    exploitableComponents: [Component]
+"""
+List of exploitable vulnerabilities
+"""
+    exploitableVulnerabilities: [Vulnerability]
+"""
+List of ignored components
+"""
+    ignoredComponents: [Component]
+"""
+List of ignored vulnerabilities
+"""
+    ignoredVulnerabilities: [Vulnerability]
+"""
+Direct url for this scan result
+"""
+    url: String
+"""
+Direct html report url for this scan result
+"""
+    htmlUrl: String
+"""
+Direct csv report url for this scan result
+"""
+    csvUrl: String
+"""
+Direct pdf report url for this scan result
+"""
+    pdfUrl: String
+}
+
+"""
+Scan of an application
+"""
+type Scan {
+"""
+Unique ID such as UUID or ULID
+"""
+    id: String! @id
+"""
+Boolean to represent if this scan was scheduled
+"""
+    isScheduled: Boolean
+"""
+User who invoked this scan if manual
+"""
+    invokedBy: User
+"""
+Creation date
+"""
+    created: DateTime! @search
+"""
+Optional validity date for this scan
+"""
+    validUntil: DateTime
+"""
+List of applications scanned
+"""
+    applications: [Application]
+"""
+List of custom tags
+"""
+    tags: [String]
+"""
+Link to a scan result
+"""
+    result: ScanResult @hasInverse(field: scan)
+"""
+Direct link to the scan
+"""
+    url: String
+}
+
+"""
+Application Environment
+"""
+type Environment {
+"""
+Unique ID such as UUID or ULID
+"""
+    id: String! @id
+"""
+Name of the environment such as dev, stage, preprod
+"""
+    name: String! @search(by: [term])
+"""
+Description of the environment for search
+"""
+    description: String @search(by: [term, fulltext])
+"""
+List of tags
+"""
+    tags: [String]
+"""
+Direct url to the environment
+"""
+    url: String
+"""
+List of users of this environment
+"""
+    users: [User]
+"""
+List of teams using this environment
+"""
+    teams: [Team]
+}
+
+"""
+Represents an application version
+"""
+type ApplicationVersion {
+"""
+Branch name
+"""
+    branch: String
+"""
+Release name
+"""
+    release: String
+"""
+VCS Tag
+"""
+    tag: String
+"""
+VCS Commit Hash
+"""
+    commit_sha: String
+}
+
+"""
+Represents an application
+"""
+type Application {
+"""
+Unique ID such as UUID or ULID
+"""
+    id: String! @id
+"""
+Name of the application
+"""
+    name: String! @search(by: [term, regexp])
+"""
+Description
+"""
+    description: String @search(by: [term, fulltext])
+"""
+Environment where this application is hosted or tested
+"""
+    environment: Environment
+"""
+Version of the application
+"""
+    version: ApplicationVersion
+"""
+URL of the repository
+"""
+    repoUrl: String
+"""
+URL to the issues tracking system such as GitHub issues or Jira
+"""
+    issuesUrl: String
+"""
+URL to the CI environment
+"""
+    ciUrl: String
+"""
+URL to the CD environment
+"""
+    cdUrl: String
+"""
+URL to the change management system used
+"""
+    changeManagementUrl: String
+"""
+List of programming languages used in the application, configurations and containers
+"""
+    languages: [String]
+"""
+List of frameworks and SDKs
+"""
+    frameworks: [String]
+"""
+List of custom classification
+"""
+    classification: [String]
+"""
+List of tags
+"""
+    tags: [String]
+"""
+Creation date
+"""
+    created: DateTime! @search
+"""
+Modified date
+"""
+    modified: DateTime! @search
+"""
+List of teams
+"""
+    teams: [Team]
+"""
+Is this application disabled?
+"""
+    disabled: Boolean
+}
+
+"""
+Properties
+"""
+type Properties {
+"""
+Property name
+"""
+    name: String! @search(by: [term, fulltext])
+"""
+Property value
+"""
+    value: String! @search(by: [term, fulltext])
+}
+
+"""
+BoM Metadata
+"""
+type BomMetadata {
+"""
+Creation Timestamp
+"""
+    timestamp: DateTime! @search
+"""
+Root component
+"""
+    component: Component
+}
+
+"""
+Represents the license of a component
+"""
+type ComponentLicense {
+"""
+Unique ID
+"""
+    id: String @search(by: [hash])
+"""
+License name
+"""
+    name: String
+"""
+License text
+"""
+    text: String
+"""
+License URL
+"""
+    url: String
+"""
+License Expression
+"""
+    expression: String
+}
+
+"""
+Component
+"""
+type Component {
+"""
+Is this a root component?
+"""
+    isRoot: Boolean
+"""
+Unique BOM Reference
+"""
+    bomRef: String!
+"""
+Group
+"""
+    group: String! @search(by: [term, regexp])
+"""
+Name of the component
+"""
+    name: String! @search(by: [term, regexp])
+"""
+Description
+"""
+    description: String @search(by: [term, fulltext])
+"""
+Component type
+"""
+    ctype: String
+"""
+Sub path
+"""
+    subPath: String
+"""
+Repository URL
+"""
+    repoUrl: String
+"""
+Download URL
+"""
+    downloadUrl: String
+"""
+Publisher
+"""
+    publisher: String
+"""
+List of licenses
+"""
+    licenses: [ComponentLicense]
+"""
+Component scope such as required, optional, excluded
+"""
+    scope: String @search(by: [exact])
+"""
+Version
+"""
+    version: String! @search(by: [term, regexp])
+"""
+Package URL
+"""
+    purl: String! @id @search(by: [term, regexp])
+"""
+List of vulnerabilities
+"""
+    vulnerabilities: [Vulnerability] @hasInverse(field: affects)
+"""
+List of properties
+"""
+    properties: [Properties]
+"""
+List of dependency
+"""
+    dependency: [Component]
+"""
+List of BoM this component appears in
+"""
+    appearsIn: [Bom] @hasInverse(field: components)
+}
+
+"""
+BoM service
+"""
+type BomServiceData {
+"""
+Data name
+"""
+    data: String
+"""
+Flow of data - inbound, outbound etc
+"""
+    flow: [String]
+"""
+Classification of data
+"""
+    classification: [String]
+}
+
+"""
+BoM Service
+"""
+type BomService {
+"""
+Unique Reference in this BoM
+"""
+    bomRef: String!
+"""
+Group
+"""
+    group: String! @search(by: [term, regexp])
+"""
+Service name
+"""
+    name: String! @search(by: [term, regexp])
+"""
+Service version
+"""
+    version: String! @search(by: [term, regexp])
+"""
+Description
+"""
+    description: String @search(by: [term, fulltext])
+"""
+List of endpoints
+"""
+    endpoints: [String] @search(by: [term])
+"""
+Boolean to indicate if this endpoint is authenticated
+"""
+    authenticated: Boolean
+"""
+Boolean to indicate if this service is cross boundary
+"""
+    xTrustBoundary: Boolean
+"""
+List of service data
+"""
+    data: [BomServiceData]
+"""
+List of component licenses
+"""
+    licenses: [ComponentLicense]
+"""
+List of services
+"""
+    services: [BomService]
+"""
+List of properties
+"""
+    properties: [Properties]
+}
+"""
+Bom type
+"""
+type Bom {
+"""
+Serial number
+"""
+    serialNumber: String! @id @search(by: [hash])
+"""
+BoM Metadata
+"""
+    metadata: BomMetadata
+"""
+List of components
+"""
+    components: [Component!]!
+"""
+List of services
+"""
+    services: [BomService]
+"""
+Application for this BoM
+"""
+    application: Application
+"""
+Scan that uses this BoM
+"""
+    scan: Scan
+"""
+List of vulnerabilities
+"""
+    vulnerabilities: [Vulnerability]
+}
+
+"""
+Severity of the vulnerability
+"""
+enum Severity {
+    critical
+    high
+    medium
+    low
+    info
+    none
+    unknown
+}
+"""
+Status of a specific vulnerability version
+"""
+enum VulnerabilityVersionStatusEnum {
+    affected
+    unaffected
+}
+"""
+Vulnerability version changes
+"""
+type VulnerabilityVersionChanges {
+    at: String!
+    status: VulnerabilityVersionStatusEnum!
+}
+"""
+Vulnerability version and its status
+"""
+type VulnerabilityVersionStatus {
+"""
+Version string
+"""
+    version: String!
+"""
+Version type such as semver
+"""
+    versionType: String
+"""
+Repository
+"""
+    repo: String
+    lessThanOrEqual: String
+    lessThan: String
+"""
+List of changes
+"""
+    changes: [VulnerabilityVersionChanges]
+"""
+Status
+"""
+    status: VulnerabilityVersionStatusEnum!
+}
+"""
+Vulnerability detail
+"""
+type VulnerabilityDetail {
+"""
+Link to the vulnerability
+"""
+    vulnerability: Vulnerability!
+"""
+Title
+"""
+    title: String @search(by: [term])
+"""
+Summary
+"""
+    summary: String @search(by: [term, fulltext])
+"""
+Date the vulnerability became public
+"""
+    datePublic: DateTime
+"""
+Collection
+"""
+    collectionURL: String
+"""
+Default status such as affected
+"""
+    defaultStatus: String
+"""
+List of descriptions
+"""
+    descriptions: [String]
+"""
+List of modules affected
+"""
+    modules: [String]
+"""
+List of program files affected
+"""
+    programFiles: [String]
+"""
+List of program routines affected
+"""
+    programRoutines: [String]
+"""
+List of platforms affected
+"""
+    platforms: [String]
+"""
+Vulnerable versions
+"""
+    versions: [VulnerabilityVersionStatus]
+"""
+List of solutions to mitigate the vulnerability
+"""
+    solutions: [String]
+"""
+List of workarounds available
+"""
+    workarounds: [String]
+"""
+List of configurations to mitigate
+"""
+    configurations: [String]
+"""
+List of exploits
+"""
+    exploits: [String]
+"""
+List of timeline
+"""
+    timeline: [String]
+"""
+List of credits
+"""
+    credits: [String]
+"""
+List of references
+"""
+    references: [String]
+"""
+Source of the vulnerability detail such as NVD, GitHub
+"""
+    source: String
+}
+
+"""
+Vulnerability source
+"""
+type VulnerabilitySource {
+"""
+Name such as NVD, GitHub
+"""
+    name: String @search(by: [term])
+"""
+URL
+"""
+    url: String
+}
+
+"""
+Advisory
+"""
+type VulnerabilityAdvisory {
+"""
+Title
+"""
+    title: String @search(by: [term])
+"""
+URL to the advisory
+"""
+    url: String
+}
+
+"""
+Vulnerability Rating
+"""
+type VulnerabilityRating {
+"""
+Severity such as critical, high
+"""
+    severity: Severity! @search(by: [hash])
+"""
+Score
+"""
+    score: Float! @search
+"""
+Method used to determine the score
+"""
+    method: String
+}
+
+"""
+Vulnerability analysis
+"""
+type VulnerabilityAnalysis {
+"""
+State such as exploitable
+"""
+    state: String @search(by: [hash, term])
+"""
+Details for the state
+"""
+    detail: String @search(by: [term, fulltext])
+}
+
+"""
+Vulnerability type
+"""
+type Vulnerability {
+"""
+Unique reference within a BoM
+"""
+    bomRef: String! @id @search(by: [hash])
+"""
+ID such as CVE or GHSA id
+"""
+    id: String! @search(by: [hash, term])
+"""
+Source
+"""
+    source: VulnerabilitySource
+"""
+List of ratings
+"""
+    ratings: [VulnerabilityRating]
+"""
+Default severity
+"""
+    severity: Severity! @search(by: [hash])
+"""
+Default CVSS scores
+"""
+    cvss_score: Float! @search
+"""
+List of CWE
+"""
+    cwes: [Int]
+"""
+Description
+"""
+    description: String @search(by: [fulltext])
+"""
+Recommendation
+"""
+    recommendation: String @search(by: [fulltext])
+"""
+List of advisories
+"""
+    advisories: [VulnerabilityAdvisory]
+"""
+Link to the analysis from an automated tool
+"""
+    analysis: VulnerabilityAnalysis
+"""
+List of components affected
+"""
+    affects: [Component]
+"""
+Affected version
+"""
+    version: String! @search(by: [term, regexp])
+"""
+Fix version
+"""
+    fix_version: String @search(by: [term, regexp])
+"""
+List of properties
+"""
+    properties: [Properties]
+"""
+Vulnerability detail
+"""
+    detail: VulnerabilityDetail @hasInverse(field: vulnerability)
+}

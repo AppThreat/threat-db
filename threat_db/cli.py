@@ -51,9 +51,12 @@ def main():
     _, client = graph_client.get(args.graphql_host, os.getenv("DGRAPH_API_KEY"))
     if args.data_dir:
         LOG.info(f"Importing data from {args.data_dir}")
-        data_loader.start(
-            client, args.data_dir, remove_on_success=args.remove_on_success
-        )
+        try:
+            data_loader.start(
+                client, args.data_dir, remove_on_success=args.remove_on_success
+            )
+        except Exception as ex:
+            LOG.exception(ex)
 
     if client:
         client.close_sync()
