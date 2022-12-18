@@ -113,8 +113,7 @@ def main():
                 graph_client.create_schemas(client, args.graphql_host)
             else:
                 LOG.info(f"Database is not live yet. Check the DB logs for any issues.")
-        except Exception as ex:
-            print(ex)
+        except Exception:
             LOG.warn(
                 "Unable to create schemas due to issues connecting to the database."
             )
@@ -141,6 +140,5 @@ def main():
                 LOG.warn(
                     "Unable to create the first administrator user. Check for any errors in the logs."
                 )
-        except Exception as ex:
-            print(ex)
+        except Exception:
             LOG.warn("Unable to create user due to issues connecting to the database.")

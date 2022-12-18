@@ -102,7 +102,6 @@ if DGRAPH_GRAPHQL_HOST in ("http://dgraph-standalone:8080/graphql"):
 def import_data():
     current_user = get_jwt_identity()
     files = request.files.getlist("file")
-    print(files)
     if not files:
         return {
             "success": "false",

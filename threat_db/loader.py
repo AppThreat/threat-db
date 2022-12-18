@@ -38,8 +38,7 @@ def get_pkg_vulns_json(jsonfile):
             bom_data = orjson.loads(fp.read())
             if bom_data:
                 return get_pkg_vulns_from_bom(bom_data)
-        except Exception as ex:
-            print(ex)
+        except Exception:
             return None, None, None, None
 
 
