@@ -372,3 +372,15 @@ query {
   }
 }
 ```
+
+Subscribing to new vulnerabilities
+
+```
+subscription subscribeVulnerability {
+  queryVulnerability (filter: {severity: {in: [critical, high]}}) {
+    id
+    severity
+    cvss_score
+  }
+}
+```
