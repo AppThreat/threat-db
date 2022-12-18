@@ -19,10 +19,8 @@ from threat_db.logger import LOG
 MAX_CONTENT_LENGTH = 10 * 1000 * 1000  # 10 Mb
 ALLOWED_EXTENSIONS = ["json", "jsonl"]
 
-DGRAPH_GRAPHQL_HOST = os.getenv(
-    "DGRAPH_GRAPHQL_HOST", "http://dgraph-standalone:8080/graphql"
-)
-DGRAPH_RPC_HOST = os.getenv("DGRAPH_RPC_HOST", "dgraph-standalone:9080")
+DGRAPH_GRAPHQL_HOST = os.getenv("DGRAPH_GRAPHQL_HOST", "http://alpha:8080/graphql")
+DGRAPH_RPC_HOST = os.getenv("DGRAPH_RPC_HOST", "alpha:9080")
 THREATDB_DATA_DIR = os.getenv("THREATDB_DATA_DIR")
 
 headers = {"Content-Type": "application/json", "Accept-Encoding": "gzip"}
@@ -88,7 +86,7 @@ def process_file(file):
     return result
 
 
-if DGRAPH_GRAPHQL_HOST in ("http://dgraph-standalone:8080/graphql"):
+if DGRAPH_GRAPHQL_HOST in ("http://alpha:8080/graphql"):
 
     @app.route("/whoami", methods=["GET"])
     @jwt_required()

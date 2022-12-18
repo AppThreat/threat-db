@@ -4,6 +4,6 @@ description: A graphql server for vulnerabilities powered by dgraph
 
 type: application
 
-version: 0.3.0
+version: 0.4.1
 
-appVersion: "0.3.0"
+appVersion: "0.4.1"

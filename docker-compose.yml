@@ -8,18 +8,30 @@ services:
       - .:/app
       - $HOME/threatdb_data_dir:/data/import
     environment:
-      - DGRAPH_GRAPHQL_HOST=${DGRAPH_GRAPHQL_HOST:-http://dgraph-standalone:8080/graphql}
-      - DGRAPH_RPC_HOST=${DGRAPH_RPC_HOST:-dgraph-standalone:9080}
-      - DGRAPH_API_KEY=${DGRAPH_API_KEY}
+      - DGRAPH_GRAPHQL_HOST=${DGRAPH_GRAPHQL_HOST:-http://alpha:8080/graphql}
+      - DGRAPH_RPC_HOST=${DGRAPH_RPC_HOST:-alpha:9080}
+      - DGRAPH_API_KEY=${DGRAPH_API_KEY:-changeme}
       - JWT_SECRET_KEY=${JWT_SECRET_KEY}
       - THREATDB_DATA_DIR=/data/import
-  dgraph-standalone:
-    image: dgraph/standalone:v22.0.1
+  zero:
+    image: dgraph/dgraph:v22.0.1
     volumes:
       - $HOME/dgraph:/dgraph
     ports:
       - 5080:5080
       - 6080:6080
+    restart: on-failure
+    command: dgraph zero --my=zero:5080 --telemetry 'reports=false;sentry=false;'
+  ratel:
+    image: dgraph/ratel:latest
+    ports:
+      - 8000:8000
+  alpha:
+    image: dgraph/dgraph:v22.0.1
+    volumes:
+      - $HOME/dgraph:/dgraph
+    ports:
       - 8080:8080
       - 9080:9080
-      - 8000:8000
+    restart: on-failure
+    command: dgraph alpha --my=alpha:7080 --zero=zero:5080 --telemetry 'reports=false;sentry=false;' --badger 'compression=zstd:1' --security 'token=changeme;whitelist=10.1.0.0/16,127.0.0.1,172.19.0.0/16'

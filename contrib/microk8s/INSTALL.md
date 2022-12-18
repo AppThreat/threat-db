@@ -14,7 +14,7 @@ microk8s enable cert-manager dns host-access hostpath-storage ingress rbac metri
 Sample output
 
 ```
-[almalinux@sbom ~]$ microk8s status
+$ microk8s status
 microk8s is running
 high-availability: no
   datastore master nodes: 127.0.0.1:19001
@@ -120,7 +120,7 @@ alpha:
   persistence:
     storageClass: "ssd-hostpath"
     size: 50Gi
-  extraFlags: "--telemetry 'reports=false;sentry=false;' --ludicrous 'enabled=true; concurrency=2000;' --badger 'compression=zstd:1' --security 'token=changeme;whitelist=10.1.0.0/16,127.0.0.1' --graphql 'introspection=false;debug=false;'"
+  extraFlags: "--telemetry 'reports=false;sentry=false;' --badger 'compression=zstd:1' --security 'token=changeme;whitelist=10.1.0.0/16,127.0.0.1' --graphql 'introspection=false;debug=false;'"
 
 global:
   ingress:
@@ -130,12 +130,12 @@ global:
       kubernetes.io/ingress.class: nginx
       cert-manager.io/cluster-issuer: letsencrypt
       kubernetes.io/ingress.class: "public"
-    ratel_hostname: "ratel.sbom.cx"
-    alpha_hostname: "gql.sbom.cx"
+    ratel_hostname: "ratel.domain.com"
+    alpha_hostname: "gql.domain.com"
   ingress_grpc:
     enabled: false
     ingressClassName: public
-    alpha_grpc_hostname: rpc1.sbom.cx
+    alpha_grpc_hostname: rpc1.domain.com
     annotations:
       kubernetes.io/ingress.class: nginx
       cert-manager.io/cluster-issuer: letsencrypt
@@ -154,7 +154,7 @@ microk8s kubectl get pods
 Example output
 
 ```
-[almalinux@sbom ~]$ microk8s kubectl get pv
+$ microk8s kubectl get pv
 NAME                                       CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS   CLAIM                                   STORAGECLASS   REASON   AGE
 pvc-69e20d51-f972-4bd9-aac0-23c393a5dcb8   25Gi       RWO            Delete           Bound    default/datadir-dev-db-dgraph-zero-0    ssd-hostpath            30m
 pvc-0678a1c7-6dff-437a-ad1f-b845bbfe7edf   50Gi       RWO            Delete           Bound    default/datadir-dev-db-dgraph-alpha-0   ssd-hostpath            30m
@@ -165,7 +165,7 @@ pvc-a1eb4ac7-a52e-4ab7-8c90-79166099c856   50Gi       RWO            Delete     
 ```
 
 ```
-[almalinux@sbom ~]$ microk8s kubectl get pvc
+$ microk8s kubectl get pvc
 NAME                            STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   AGE
 datadir-dev-db-dgraph-zero-0    Bound    pvc-69e20d51-f972-4bd9-aac0-23c393a5dcb8   25Gi       RWO            ssd-hostpath   30m
 datadir-dev-db-dgraph-alpha-0   Bound    pvc-0678a1c7-6dff-437a-ad1f-b845bbfe7edf   50Gi       RWO            ssd-hostpath   30m
@@ -176,7 +176,7 @@ datadir-dev-db-dgraph-alpha-2   Bound    pvc-a1eb4ac7-a52e-4ab7-8c90-79166099c85
 ```
 
 ```
-[almalinux@sbom ~]$ microk8s kubectl get pods
+$ microk8s kubectl get pods
 NAME                    READY   STATUS    RESTARTS   AGE
 dev-db-dgraph-alpha-0   1/1     Running   0          29m
 dev-db-dgraph-zero-0    1/1     Running   0          29m
@@ -187,7 +187,7 @@ dev-db-dgraph-alpha-2   1/1     Running   0          29m
 ```
 
 ````
-[almalinux@sbom ~]$ microk8s kubectl get service
+$ microk8s kubectl get service
 NAME                           TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)             AGE
 kubernetes                     ClusterIP   10.152.183.1     <none>        443/TCP             52m
 dev-db-dgraph-zero-headless    ClusterIP   None             <none>        5080/TCP            29m
@@ -200,7 +200,7 @@ dev-db-dgraph-zero             ClusterIP   10.152.183.112   <none>        5080/T
 
 ```
 # microk8s helm uninstall threat-db-api
-microk8s helm install threat-db-api oci://ghcr.io/ngcloudsec/charts/threat-db --version 0.3.0 --set persistence.storageClass="ssd-hostpath" --set persistence.size="1Gi"
+microk8s helm install threat-db-api oci://ghcr.io/ngcloudsec/charts/threat-db --version 0.4.1 --set persistence.storageClass="ssd-hostpath" --set persistence.size="1Gi"
 microk8s kubectl get pods
 ```
 
@@ -232,10 +232,10 @@ metadata:
 spec:
   tls:
     - hosts:
-      - api.sbom.cx
+      - api.domain.com
       secretName: api-alpha-tls
   rules:
-  - host: "api.sbom.cx"
+  - host: "api.domain.com"
     http:
       paths:
       - path: /login
@@ -289,10 +289,10 @@ metadata:
 spec:
   tls:
     - hosts:
-      - gql.sbom.cx
+      - gql.domain.com
       secretName: gql-alpha-tls
   rules:
-  - host: "gql.sbom.cx"
+  - host: "gql.domain.com"
     http:
       paths:
       - path: /graphql
@@ -346,10 +346,10 @@ metadata:
 spec:
   tls:
     - hosts:
-      - rpc1.sbom.cx
+      - rpc1.domain.com
       secretName: rpc-alpha-tls
   rules:
-  - host: "rpc1.sbom.cx"
+  - host: "rpc1.domain.com"
     http:
       paths:
       - path: /
@@ -370,9 +370,9 @@ microk8s kubectl apply -f ing.yaml
 Sample output
 
 ```
-[almalinux@sbom ~]$ microk8s kubectl get ingress
+$ microk8s kubectl get ingress
 NAME               CLASS    HOSTS                      ADDRESS     PORTS     AGE
-gql-http-ingress   <none>   gql.sbom.cx,rpc1.sbom.cx   127.0.0.1   80, 443   4m58s
+gql-http-ingress   <none>   gql.domain.com,rpc1.domain.com   127.0.0.1   80, 443   4m58s
 ```
 
 Extra ingress annotations

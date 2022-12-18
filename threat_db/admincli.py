@@ -140,5 +140,8 @@ def main():
                 LOG.warn(
                     "Unable to create the first administrator user. Check for any errors in the logs."
                 )
-        except Exception:
-            LOG.warn("Unable to create user due to issues connecting to the database.")
+        except Exception as ex:
+            LOG.exception(ex)
+            LOG.warn(
+                "Unable to create user due to issues connecting to the database. Check if the schema was created successfully."
+            )

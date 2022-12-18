@@ -48,6 +48,7 @@ def get_pkg_vulns_from_bom(bom_data):
     metadata = {}
     metadata = bom_data.get("metadata")
     vulnerabilities = []
+    added_vkeys = {}
     if bom_data.get("components"):
         serial_number = bom_data.get("serialNumber", "")
         for comp in bom_data.get("components"):
@@ -95,6 +96,9 @@ def get_pkg_vulns_from_bom(bom_data):
             del fcomp["bom-ref"]
             pkgs.append(fcomp)
         for avuln in bom_data.get("vulnerabilities", []):
+            bomRef = avuln.get("bom-ref")
+            if added_vkeys.get(bomRef):
+                continue
             affects = []
             version = ""
             fix_version = ""
@@ -114,7 +118,7 @@ def get_pkg_vulns_from_bom(bom_data):
                         cvss_score = ar.get("score")
             fvuln = {
                 **avuln,
-                "bomRef": avuln.get("bom-ref"),
+                "bomRef": bomRef,
                 "affects": affects,
                 "version": version,
                 "fix_version": fix_version,
@@ -123,6 +127,7 @@ def get_pkg_vulns_from_bom(bom_data):
             }
             del fvuln["bom-ref"]
             vulnerabilities.append(fvuln)
+            added_vkeys[bomRef] = True
     return (serial_number, metadata, pkgs, vulnerabilities)
 
 
@@ -160,7 +165,7 @@ def process_vex_file(client, jsonf):
             root_component["bomRef"] = root_component.get("bom-ref")
             root_component["ctype"] = root_component.get("type")
             del root_component["bom-ref"]
-        graph_client.create_bom(
+        result = graph_client.create_bom(
             client,
             [
                 {
@@ -174,6 +179,7 @@ def process_vex_file(client, jsonf):
                 }
             ],
         )
+        print(result)
     return True
 
 

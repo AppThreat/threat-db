@@ -65,8 +65,7 @@ def catch_db_errors(fn):
                 ):
                     LOG.info("Retrying failed mutation")
                     return fn(*args, **kwargs)
-                else:
-                    raise tqe
+            raise tqe
         except Exception as ex:
             LOG.exception(ex)
 
@@ -167,20 +166,24 @@ def create_bom(client, bom):
         try:
             result = session.execute(query)
         except TransportQueryError as tqe:
+            LOG.exception(tqe)
             if tqe.errors:
                 first_error = tqe.errors[0].get("message", "")
                 if "duplicate XID found" in first_error:
-                    LOG.debug(
-                        "Some components in this BoM were also found in another BoM"
+                    LOG.info(
+                        "Some components in this BoM were also found in another BoM."
                     )
                     return None
                 elif (
                     "already exists for field serialNumber inside type Bom"
                     in first_error
                 ):
-                    LOG.warn(
+                    LOG.info(
                         "BoM is immutable therefore duplicate submissions are not allowed."
                     )
+                    return None
+                elif "Non-nullable field 'serialNumber'" in first_error:
+                    LOG.info("Issues found with nested serialNumber fields.")
                     return None
                 else:
                     LOG.exception(tqe)
@@ -230,7 +233,7 @@ def create_user(client, users):
         ds = DSLSchema(client.schema)
         query = dsl_gql(
             DSLMutation(
-                ds.Mutation.addUser(input=users, upsert=True).select(
+                ds.Mutation.addUser(input=users, upsert=False).select(
                     ds.AddUserPayload.user.select(
                         ds.User.id, ds.User.created, ds.User.disabled
                     )
