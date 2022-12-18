@@ -147,7 +147,7 @@ Use helm to create an HA installation.
 ```
 microk8s helm repo add dgraph https://charts.dgraph.io
 microk8s helm install dev-db dgraph/dgraph --values dgraph-values.yaml
-microk8s helm uninstall dev-db
+# microk8s helm uninstall dev-db
 microk8s kubectl get pods
 ```
 
@@ -200,7 +200,7 @@ dev-db-dgraph-zero             ClusterIP   10.152.183.112   <none>        5080/T
 
 ```
 # microk8s helm uninstall threat-db-api
-microk8s helm install threat-db-api oci://ghcr.io/ngcloudsec/charts/threat-db --version 0.4.1 --set persistence.storageClass="ssd-hostpath" --set persistence.size="1Gi"
+microk8s helm install threat-db-api oci://ghcr.io/ngcloudsec/charts/threat-db --version 0.5.0 --set persistence.storageClass="ssd-hostpath" --set persistence.size="1Gi"
 microk8s kubectl get pods
 ```
 

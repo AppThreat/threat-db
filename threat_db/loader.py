@@ -179,7 +179,11 @@ def process_vex_file(client, jsonf):
                 }
             ],
         )
-        print(result)
+        if result and result.get("addBom"):
+            LOG.debug(result)
+            return True
+        else:
+            return False
     return True
 
 
