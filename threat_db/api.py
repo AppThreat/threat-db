@@ -10,9 +10,9 @@ from flask_jwt_extended import (
     jwt_required,
 )
 from uwsgidecorators import filemon
+
 import threat_db.graphclient as graph_client
 import threat_db.loader as data_loader
-
 from threat_db.config import JWT_ACCESS_TOKEN_EXPIRES_HOURS
 from threat_db.logger import LOG
 
@@ -136,7 +136,12 @@ if THREATDB_DATA_DIR and os.path.exists(THREATDB_DATA_DIR):
 
         @filemon(THREATDB_DATA_DIR)
         def data_drop(signum):
-            data_loader.start(client, THREATDB_DATA_DIR, remove_on_success=True)
+            try:
+                data_loader.start(client, THREATDB_DATA_DIR, remove_on_success=True)
+            except Exception:
+                LOG.debug(
+                    f"Error processing the files in {THREATDB_DATA_DIR}. This is usually due to duplicate invocations."
+                )
 
     else:
         LOG.warn(

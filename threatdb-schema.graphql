@@ -1,8 +1,23 @@
 """"""
+directive @hasInverse(field: String!) on FIELD_DEFINITION
+
+""""""
+directive @lambdaOnMutate(add: Boolean, update: Boolean, delete: Boolean) on OBJECT | INTERFACE
+
+""""""
 directive @cacheControl(maxAge: Int!) on QUERY
 
 """"""
-directive @id on FIELD_DEFINITION
+directive @generate(query: GenerateQueryParams, mutation: GenerateMutationParams, subscription: Boolean) on OBJECT | INTERFACE
+
+""""""
+directive @dgraph(type: String, pred: String) on OBJECT | INTERFACE | FIELD_DEFINITION
+
+""""""
+directive @custom(http: CustomHTTP, dql: String) on FIELD_DEFINITION
+
+""""""
+directive @remoteResponse(name: String) on FIELD_DEFINITION
 
 """"""
 directive @auth(password: AuthRule, query: AuthRule, add: AuthRule, update: AuthRule, delete: AuthRule) on OBJECT | INTERFACE
@@ -17,258 +32,383 @@ directive @cascade(fields: [String]) on FIELD
 directive @lambda on FIELD_DEFINITION
 
 """"""
-directive @withSubscription on OBJECT | INTERFACE | FIELD_DEFINITION
-
-""""""
-directive @custom(http: CustomHTTP, dql: String) on FIELD_DEFINITION
-
-""""""
-directive @remoteResponse(name: String) on FIELD_DEFINITION
-
-""""""
-directive @lambdaOnMutate(add: Boolean, update: Boolean, delete: Boolean) on OBJECT | INTERFACE
-
-""""""
-directive @generate(query: GenerateQueryParams, mutation: GenerateMutationParams, subscription: Boolean) on OBJECT | INTERFACE
-
-""""""
-directive @hasInverse(field: String!) on FIELD_DEFINITION
-
-""""""
 directive @search(by: [DgraphIndex!]) on FIELD_DEFINITION
 
 """"""
-directive @dgraph(type: String, pred: String) on OBJECT | INTERFACE | FIELD_DEFINITION
+directive @id on FIELD_DEFINITION
 
 """"""
 directive @secret(field: String!, pred: String) on OBJECT | INTERFACE
 
 """"""
-input VulnerabilityDetailRef {
+directive @withSubscription on OBJECT | INTERFACE | FIELD_DEFINITION
+
+""""""
+input IntFilter {
   """"""
-  vulnerability: VulnerabilityRef
+  eq: Int
 
   """"""
-  title: String
+  in: [Int]
 
   """"""
-  summary: String
+  le: Int
 
   """"""
-  datePublic: DateTime
+  lt: Int
 
   """"""
-  collectionURL: String
+  ge: Int
 
   """"""
-  defaultStatus: String
+  gt: Int
 
   """"""
-  descriptions: [String]
-
-  """"""
-  modules: [String]
-
-  """"""
-  programFiles: [String]
-
-  """"""
-  programRoutines: [String]
-
-  """"""
-  platforms: [String]
-
-  """"""
-  versions: [VulnerabilityVersionStatusRef]
-
-  """"""
-  solutions: [String]
-
-  """"""
-  workarounds: [String]
-
-  """"""
-  configurations: [String]
-
-  """"""
-  exploits: [String]
-
-  """"""
-  timeline: [String]
-
-  """"""
-  credits: [String]
-
-  """"""
-  references: [String]
-
-  """"""
-  source: String
+  between: IntRange
 }
 
 """"""
-input VulnerabilityRatingRef {
+type BomServiceDataAggregateResult {
   """"""
-  severity: Severity
+  count: Int
 
   """"""
-  score: Float
+  dataMin: String
 
   """"""
-  method: String
+  dataMax: String
 }
 
 """"""
-input VulnerabilityVersionChangesOrder {
+type DeleteVulnerabilityVersionChangesPayload {
   """"""
-  asc: VulnerabilityVersionChangesOrderable
+  vulnerabilityVersionChanges(filter: VulnerabilityVersionChangesFilter, order: VulnerabilityVersionChangesOrder, first: Int, offset: Int): [VulnerabilityVersionChanges]
 
   """"""
-  desc: VulnerabilityVersionChangesOrderable
-
-  """"""
-  then: VulnerabilityVersionChangesOrder
-}
-
-""""""
-type AddVulnerabilityDetailPayload {
-  """"""
-  vulnerabilityDetail(filter: VulnerabilityDetailFilter, order: VulnerabilityDetailOrder, first: Int, offset: Int): [VulnerabilityDetail]
+  msg: String
 
   """"""
   numUids: Int
 }
 
 """"""
-input AddUserRoleInput {
+type UpdateScanResultPayload {
   """"""
-  id: String!
+  scanResult(filter: ScanResultFilter, order: ScanResultOrder, first: Int, offset: Int): [ScanResult]
 
   """"""
-  user: UserRef!
+  numUids: Int
+}
+
+""""""
+enum EnvironmentHasFilter {
+  """"""
+  id
 
   """"""
-  team: TeamRef!
+  name
 
   """"""
-  role: String!
+  description
 
   """"""
+  tags
+
+  """"""
+  url
+
+  """"""
+  users
+
+  """"""
+  teams
+}
+
+""""""
+input ApplicationRef {
+  """Unique ID such as UUID or ULID"""
+  id: String
+
+  """Name of the application"""
+  name: String
+
+  """Description"""
+  description: String
+
+  """"""
+  environment: EnvironmentRef
+
+  """"""
+  version: ApplicationVersionRef
+
+  """URL of the repository"""
+  repoUrl: String
+
+  """URL to the issues tracking system such as GitHub issues or Jira"""
+  issuesUrl: String
+
+  """URL to the CI environment"""
+  ciUrl: String
+
+  """URL to the CD environment"""
+  cdUrl: String
+
+  """URL to the change management system used"""
+  changeManagementUrl: String
+
+  """
+  List of programming languages used in the application, configurations and containers
+  """
+  languages: [String]
+
+  """List of frameworks and SDKs"""
+  frameworks: [String]
+
+  """List of custom classification"""
+  classification: [String]
+
+  """List of tags"""
+  tags: [String]
+
+  """Creation date"""
   created: DateTime
 
-  """"""
+  """Modified date"""
   modified: DateTime
 
   """"""
+  teams: [TeamRef]
+
+  """Is this application disabled?"""
   disabled: Boolean
 }
 
 """"""
-input AddBomServiceInput {
+input ComponentLicenseOrder {
   """"""
+  asc: ComponentLicenseOrderable
+
+  """"""
+  desc: ComponentLicenseOrderable
+
+  """"""
+  then: ComponentLicenseOrder
+}
+
+""""""
+enum BomOrderable {
+  """"""
+  serialNumber
+}
+
+""""""
+input AddVulnerabilityVersionChangesInput {
+  """"""
+  at: String!
+
+  """"""
+  status: VulnerabilityVersionStatusEnum!
+}
+
+""""""
+input VulnerabilityAnalysisRef {
+  """State such as exploitable"""
+  state: String
+
+  """Details for the state"""
+  detail: String
+}
+
+"""Vulnerability type"""
+type Vulnerability {
+  """Unique reference within a BoM"""
   bomRef: String!
 
-  """"""
-  group: String!
+  """ID such as CVE or GHSA id"""
+  id: String!
 
-  """"""
-  name: String!
+  """Source"""
+  source(filter: VulnerabilitySourceFilter): VulnerabilitySource
 
-  """"""
-  version: String!
+  """List of ratings"""
+  ratings(filter: VulnerabilityRatingFilter, order: VulnerabilityRatingOrder, first: Int, offset: Int): [VulnerabilityRating]
 
-  """"""
+  """Default severity"""
+  severity: Severity!
+
+  """Default CVSS scores"""
+  cvss_score: Float!
+
+  """List of CWE"""
+  cwes: [Int]
+
+  """Description"""
   description: String
 
-  """"""
-  endpoints: [String]
+  """Recommendation"""
+  recommendation: String
+
+  """List of advisories"""
+  advisories(filter: VulnerabilityAdvisoryFilter, order: VulnerabilityAdvisoryOrder, first: Int, offset: Int): [VulnerabilityAdvisory]
+
+  """Link to the analysis from an automated tool"""
+  analysis(filter: VulnerabilityAnalysisFilter): VulnerabilityAnalysis
+
+  """List of components affected"""
+  affects(filter: ComponentFilter, order: ComponentOrder, first: Int, offset: Int): [Component]
+
+  """Affected version"""
+  version: String!
+
+  """Fix version"""
+  fix_version: String
+
+  """List of properties"""
+  properties(filter: PropertiesFilter, order: PropertiesOrder, first: Int, offset: Int): [Properties]
+
+  """Vulnerability detail"""
+  detail(filter: VulnerabilityDetailFilter): VulnerabilityDetail
 
   """"""
-  authenticated: Boolean
+  ratingsAggregate(filter: VulnerabilityRatingFilter): VulnerabilityRatingAggregateResult
 
   """"""
-  xTrustBoundary: Boolean
+  advisoriesAggregate(filter: VulnerabilityAdvisoryFilter): VulnerabilityAdvisoryAggregateResult
 
   """"""
-  data: [BomServiceDataRef]
+  affectsAggregate(filter: ComponentFilter): ComponentAggregateResult
 
   """"""
-  licenses: [ComponentLicenseRef]
-
-  """"""
-  services: [BomServiceRef]
-
-  """"""
-  properties: [PropertiesRef]
+  propertiesAggregate(filter: PropertiesFilter): PropertiesAggregateResult
 }
 
 """"""
-input ComponentLicensePatch {
+input NearFilter {
   """"""
-  id: String
+  distance: Float!
 
   """"""
+  coordinate: PointRef!
+}
+
+""""""
+type Polygon {
+  """"""
+  coordinates: [PointList!]!
+}
+
+""""""
+type UpdateVulnerabilityVersionStatusPayload {
+  """"""
+  vulnerabilityVersionStatus(filter: VulnerabilityVersionStatusFilter, order: VulnerabilityVersionStatusOrder, first: Int, offset: Int): [VulnerabilityVersionStatus]
+
+  """"""
+  numUids: Int
+}
+
+""""""
+input VulnerabilityAnalysisOrder {
+  """"""
+  asc: VulnerabilityAnalysisOrderable
+
+  """"""
+  desc: VulnerabilityAnalysisOrderable
+
+  """"""
+  then: VulnerabilityAnalysisOrder
+}
+
+""""""
+input VulnerabilitySourcePatch {
+  """Name such as NVD, GitHub"""
   name: String
 
-  """"""
-  text: String
-
-  """"""
+  """URL"""
   url: String
-
-  """"""
-  expression: String
 }
 
 """"""
-input UserRoleOrder {
+input PolygonGeoFilter {
   """"""
-  asc: UserRoleOrderable
+  near: NearFilter
 
   """"""
-  desc: UserRoleOrderable
+  within: WithinFilter
 
   """"""
-  then: UserRoleOrder
+  contains: ContainsFilter
+
+  """"""
+  intersects: IntersectsFilter
 }
 
 """"""
-input VulnerabilityVersionChangesPatch {
+type AddComponentPayload {
   """"""
-  at: String
-
-  """"""
-  status: VulnerabilityVersionStatusEnum
-}
-
-""""""
-type UpdateUserRolePayload {
-  """"""
-  userRole(filter: UserRoleFilter, order: UserRoleOrder, first: Int, offset: Int): [UserRole]
+  component(filter: ComponentFilter, order: ComponentOrder, first: Int, offset: Int): [Component]
 
   """"""
   numUids: Int
 }
 
 """"""
-enum ApplicationVersionHasFilter {
+type DeleteBomMetadataPayload {
   """"""
-  branch
+  bomMetadata(filter: BomMetadataFilter, order: BomMetadataOrder, first: Int, offset: Int): [BomMetadata]
 
   """"""
-  release
-
-  """"""
-  tag
-}
-
-""""""
-type UpdateVulnerabilityRatingPayload {
-  """"""
-  vulnerabilityRating(filter: VulnerabilityRatingFilter, order: VulnerabilityRatingOrder, first: Int, offset: Int): [VulnerabilityRating]
+  msg: String
 
   """"""
   numUids: Int
+}
+
+""""""
+type UpdateVulnerabilitySourcePayload {
+  """"""
+  vulnerabilitySource(filter: VulnerabilitySourceFilter, order: VulnerabilitySourceOrder, first: Int, offset: Int): [VulnerabilitySource]
+
+  """"""
+  numUids: Int
+}
+
+""""""
+enum BomServiceHasFilter {
+  """"""
+  bomRef
+
+  """"""
+  group
+
+  """"""
+  name
+
+  """"""
+  version
+
+  """"""
+  description
+
+  """"""
+  endpoints
+
+  """"""
+  authenticated
+
+  """"""
+  xTrustBoundary
+
+  """"""
+  data
+
+  """"""
+  licenses
+
+  """"""
+  services
+
+  """"""
+  properties
 }
 
 """"""
@@ -281,6 +421,150 @@ enum VulnerabilityRatingHasFilter {
 
   """"""
   method
+}
+
+""""""
+input ComponentFilter {
+  """"""
+  group: StringRegExpFilter_StringTermFilter
+
+  """"""
+  name: StringRegExpFilter_StringTermFilter
+
+  """"""
+  description: StringFullTextFilter_StringTermFilter
+
+  """"""
+  scope: StringExactFilter
+
+  """"""
+  version: StringRegExpFilter_StringTermFilter
+
+  """"""
+  purl: StringHashFilter_StringRegExpFilter_StringTermFilter
+
+  """"""
+  has: [ComponentHasFilter]
+
+  """"""
+  and: [ComponentFilter]
+
+  """"""
+  or: [ComponentFilter]
+
+  """"""
+  not: ComponentFilter
+}
+
+""""""
+input UpdateVulnerabilitySourceInput {
+  """"""
+  filter: VulnerabilitySourceFilter!
+
+  """"""
+  set: VulnerabilitySourcePatch
+
+  """"""
+  remove: VulnerabilitySourcePatch
+}
+
+""""""
+input UpdateVulnerabilityVersionStatusInput {
+  """"""
+  filter: VulnerabilityVersionStatusFilter!
+
+  """"""
+  set: VulnerabilityVersionStatusPatch
+
+  """"""
+  remove: VulnerabilityVersionStatusPatch
+}
+
+"""Roles assigned to a user"""
+type UserRole {
+  """Unique ID such as UUID or ULID"""
+  id: String!
+
+  """User"""
+  user(filter: UserFilter): User!
+
+  """Team"""
+  team(filter: TeamFilter): Team!
+
+  """Role string. Example: administrator, developer, security"""
+  role: String!
+
+  """Creation date"""
+  created: DateTime
+
+  """Modified date"""
+  modified: DateTime
+
+  """Is this role disabled?"""
+  disabled: Boolean
+}
+
+""""""
+type DeleteApplicationVersionPayload {
+  """"""
+  applicationVersion(filter: ApplicationVersionFilter, order: ApplicationVersionOrder, first: Int, offset: Int): [ApplicationVersion]
+
+  """"""
+  msg: String
+
+  """"""
+  numUids: Int
+}
+
+""""""
+type UpdateComponentLicensePayload {
+  """"""
+  componentLicense(filter: ComponentLicenseFilter, order: ComponentLicenseOrder, first: Int, offset: Int): [ComponentLicense]
+
+  """"""
+  numUids: Int
+}
+
+""""""
+type VulnerabilityDetailAggregateResult {
+  """"""
+  count: Int
+
+  """"""
+  titleMin: String
+
+  """"""
+  titleMax: String
+
+  """"""
+  summaryMin: String
+
+  """"""
+  summaryMax: String
+
+  """"""
+  datePublicMin: DateTime
+
+  """"""
+  datePublicMax: DateTime
+
+  """"""
+  collectionURLMin: String
+
+  """"""
+  collectionURLMax: String
+
+  """"""
+  defaultStatusMin: String
+
+  """"""
+  defaultStatusMax: String
+
+  """"""
+  sourceMin: String
+
+  """"""
+  sourceMax: String
 }
 
 """"""
@@ -308,67 +592,235 @@ input EnvironmentFilter {
 }
 
 """"""
-type DeletePropertiesPayload {
+type PointList {
   """"""
-  properties(filter: PropertiesFilter, order: PropertiesOrder, first: Int, offset: Int): [Properties]
-
-  """"""
-  msg: String
-
-  """"""
-  numUids: Int
+  points: [Point!]!
 }
 
 """"""
-type DeleteTeamPayload {
+input GenerateMutationParams {
   """"""
-  team(filter: TeamFilter, order: TeamOrder, first: Int, offset: Int): [Team]
+  add: Boolean
 
   """"""
-  msg: String
+  update: Boolean
 
   """"""
-  numUids: Int
+  delete: Boolean
 }
 
 """"""
-type AddUserPayload {
-  """"""
-  user(filter: UserFilter, order: UserOrder, first: Int, offset: Int): [User]
-
-  """"""
-  numUids: Int
-}
-
-""""""
-type UpdateBomServiceDataPayload {
-  """"""
-  bomServiceData(filter: BomServiceDataFilter, order: BomServiceDataOrder, first: Int, offset: Int): [BomServiceData]
-
-  """"""
-  numUids: Int
-}
-
-""""""
-type VulnerabilityAnalysisAggregateResult {
+type EnvironmentAggregateResult {
   """"""
   count: Int
 
   """"""
-  stateMin: String
+  idMin: String
 
   """"""
-  stateMax: String
+  idMax: String
 
   """"""
-  detailMin: String
+  nameMin: String
 
   """"""
-  detailMax: String
+  nameMax: String
+
+  """"""
+  descriptionMin: String
+
+  """"""
+  descriptionMax: String
+
+  """"""
+  urlMin: String
+
+  """"""
+  urlMax: String
 }
 
 """"""
-enum ComponentLicenseHasFilter {
+type UserRoleAggregateResult {
+  """"""
+  count: Int
+
+  """"""
+  idMin: String
+
+  """"""
+  idMax: String
+
+  """"""
+  roleMin: String
+
+  """"""
+  roleMax: String
+
+  """"""
+  createdMin: DateTime
+
+  """"""
+  createdMax: DateTime
+
+  """"""
+  modifiedMin: DateTime
+
+  """"""
+  modifiedMax: DateTime
+}
+
+""""""
+enum ScanHasFilter {
+  """"""
+  id
+
+  """"""
+  isScheduled
+
+  """"""
+  invokedBy
+
+  """"""
+  created
+
+  """"""
+  validUntil
+
+  """"""
+  applications
+
+  """"""
+  tags
+
+  """"""
+  result
+
+  """"""
+  url
+}
+
+""""""
+enum ScanOrderable {
+  """"""
+  id
+
+  """"""
+  created
+
+  """"""
+  validUntil
+
+  """"""
+  url
+}
+
+""""""
+input BomServicePatch {
+  """Unique Reference in this BoM"""
+  bomRef: String
+
+  """Group"""
+  group: String
+
+  """Service name"""
+  name: String
+
+  """Service version"""
+  version: String
+
+  """Description"""
+  description: String
+
+  """List of endpoints"""
+  endpoints: [String]
+
+  """Boolean to indicate if this endpoint is authenticated"""
+  authenticated: Boolean
+
+  """Boolean to indicate if this service is cross boundary"""
+  xTrustBoundary: Boolean
+
+  """"""
+  data: [BomServiceDataRef]
+
+  """"""
+  licenses: [ComponentLicenseRef]
+
+  """"""
+  services: [BomServiceRef]
+
+  """"""
+  properties: [PropertiesRef]
+}
+
+""""""
+input PropertiesRef {
+  """Property name"""
+  name: String
+
+  """Property value"""
+  value: String
+}
+
+""""""
+input UpdateScanResultInput {
+  """"""
+  filter: ScanResultFilter!
+
+  """"""
+  set: ScanResultPatch
+
+  """"""
+  remove: ScanResultPatch
+}
+
+""""""
+input UpdateVulnerabilityVersionChangesInput {
+  """"""
+  filter: VulnerabilityVersionChangesFilter!
+
+  """"""
+  set: VulnerabilityVersionChangesPatch
+
+  """"""
+  remove: VulnerabilityVersionChangesPatch
+}
+
+""""""
+input UserRoleOrder {
+  """"""
+  asc: UserRoleOrderable
+
+  """"""
+  desc: UserRoleOrderable
+
+  """"""
+  then: UserRoleOrder
+}
+
+""""""
+input VulnerabilityAnalysisPatch {
+  """State such as exploitable"""
+  state: String
+
+  """Details for the state"""
+  detail: String
+}
+
+""""""
+type DeleteVulnerabilityAdvisoryPayload {
+  """"""
+  vulnerabilityAdvisory(filter: VulnerabilityAdvisoryFilter, order: VulnerabilityAdvisoryOrder, first: Int, offset: Int): [VulnerabilityAdvisory]
+
+  """"""
+  msg: String
+
+  """"""
+  numUids: Int
+}
+
+""""""
+enum ComponentLicenseOrderable {
   """"""
   id
 
@@ -386,42 +838,489 @@ enum ComponentLicenseHasFilter {
 }
 
 """"""
-input AddBomServiceDataInput {
+input BomServiceFilter {
   """"""
-  data: String
+  group: StringRegExpFilter_StringTermFilter
 
   """"""
-  flow: [String]
+  name: StringRegExpFilter_StringTermFilter
 
   """"""
-  classification: [String]
+  version: StringRegExpFilter_StringTermFilter
+
+  """"""
+  description: StringFullTextFilter_StringTermFilter
+
+  """"""
+  endpoints: StringTermFilter
+
+  """"""
+  has: [BomServiceHasFilter]
+
+  """"""
+  and: [BomServiceFilter]
+
+  """"""
+  or: [BomServiceFilter]
+
+  """"""
+  not: BomServiceFilter
 }
 
 """"""
-input ScanPatch {
+input Int64Range {
   """"""
-  isScheduled: Boolean
+  min: Int64!
 
   """"""
-  invokedBy: UserRef
+  max: Int64!
+}
+
+""""""
+type VulnerabilityVersionStatusAggregateResult {
+  """"""
+  count: Int
 
   """"""
-  created: DateTime
+  versionMin: String
 
   """"""
-  validUntil: DateTime
+  versionMax: String
 
   """"""
-  applications: [ApplicationRef]
+  versionTypeMin: String
 
   """"""
+  versionTypeMax: String
+
+  """"""
+  repoMin: String
+
+  """"""
+  repoMax: String
+
+  """"""
+  lessThanOrEqualMin: String
+
+  """"""
+  lessThanOrEqualMax: String
+
+  """"""
+  lessThanMin: String
+
+  """"""
+  lessThanMax: String
+}
+
+""""""
+enum TeamHasFilter {
+  """"""
+  id
+
+  """"""
+  name
+
+  """"""
+  description
+
+  """"""
+  tags
+
+  """"""
+  users
+
+  """"""
+  applications
+
+  """"""
+  created
+
+  """"""
+  modified
+
+  """"""
+  disabled
+}
+
+""""""
+input ApplicationOrder {
+  """"""
+  asc: ApplicationOrderable
+
+  """"""
+  desc: ApplicationOrderable
+
+  """"""
+  then: ApplicationOrder
+}
+
+""""""
+input ComponentLicenseRef {
+  """Unique ID"""
+  id: String
+
+  """License name"""
+  name: String
+
+  """License text"""
+  text: String
+
+  """License URL"""
+  url: String
+
+  """License Expression"""
+  expression: String
+}
+
+""""""
+input EnvironmentPatch {
+  """Name of the environment such as dev, stage, preprod"""
+  name: String
+
+  """Description of the environment for search"""
+  description: String
+
+  """List of tags"""
   tags: [String]
 
-  """"""
-  result: ScanResultRef
+  """Direct url to the environment"""
+  url: String
 
   """"""
+  users: [UserRef]
+
+  """"""
+  teams: [TeamRef]
+}
+
+""""""
+input PropertiesPatch {
+  """Property name"""
+  name: String
+
+  """Property value"""
+  value: String
+}
+
+""""""
+input UpdateBomServiceDataInput {
+  """"""
+  filter: BomServiceDataFilter!
+
+  """"""
+  set: BomServiceDataPatch
+
+  """"""
+  remove: BomServiceDataPatch
+}
+
+""""""
+input VulnerabilityVersionStatusPatch {
+  """Version string"""
+  version: String
+
+  """Version type such as semver"""
+  versionType: String
+
+  """Repository"""
+  repo: String
+
+  """"""
+  lessThanOrEqual: String
+
+  """"""
+  lessThan: String
+
+  """"""
+  changes: [VulnerabilityVersionChangesRef]
+
+  """Status"""
+  status: VulnerabilityVersionStatusEnum
+}
+
+"""Represents the license of a component"""
+type ComponentLicense {
+  """Unique ID"""
+  id: String
+
+  """License name"""
+  name: String
+
+  """License text"""
+  text: String
+
+  """License URL"""
   url: String
+
+  """License Expression"""
+  expression: String
+}
+
+"""
+The Int64 scalar type represents a signed 64‐bit numeric non‐fractional value.
+Int64 can represent values in range [-(2^63),(2^63 - 1)].
+"""
+scalar Int64
+
+""""""
+type Point {
+  """"""
+  longitude: Float!
+
+  """"""
+  latitude: Float!
+}
+
+""""""
+type DeleteBomServicePayload {
+  """"""
+  bomService(filter: BomServiceFilter, order: BomServiceOrder, first: Int, offset: Int): [BomService]
+
+  """"""
+  msg: String
+
+  """"""
+  numUids: Int
+}
+
+""""""
+type UpdateBomServiceDataPayload {
+  """"""
+  bomServiceData(filter: BomServiceDataFilter, order: BomServiceDataOrder, first: Int, offset: Int): [BomServiceData]
+
+  """"""
+  numUids: Int
+}
+
+""""""
+enum PropertiesHasFilter {
+  """"""
+  name
+
+  """"""
+  value
+}
+
+""""""
+enum TeamOrderable {
+  """"""
+  id
+
+  """"""
+  name
+
+  """"""
+  description
+
+  """"""
+  created
+
+  """"""
+  modified
+}
+
+""""""
+enum VulnerabilityVersionChangesHasFilter {
+  """"""
+  at
+
+  """"""
+  status
+}
+
+""""""
+input ComponentLicensePatch {
+  """Unique ID"""
+  id: String
+
+  """License name"""
+  name: String
+
+  """License text"""
+  text: String
+
+  """License URL"""
+  url: String
+
+  """License Expression"""
+  expression: String
+}
+
+""""""
+input UpdateEnvironmentInput {
+  """"""
+  filter: EnvironmentFilter!
+
+  """"""
+  set: EnvironmentPatch
+
+  """"""
+  remove: EnvironmentPatch
+}
+
+""""""
+input VulnerabilitySourceFilter {
+  """"""
+  name: StringTermFilter
+
+  """"""
+  has: [VulnerabilitySourceHasFilter]
+
+  """"""
+  and: [VulnerabilitySourceFilter]
+
+  """"""
+  or: [VulnerabilitySourceFilter]
+
+  """"""
+  not: VulnerabilitySourceFilter
+}
+
+""""""
+input VulnerabilityVersionStatusOrder {
+  """"""
+  asc: VulnerabilityVersionStatusOrderable
+
+  """"""
+  desc: VulnerabilityVersionStatusOrderable
+
+  """"""
+  then: VulnerabilityVersionStatusOrder
+}
+
+""""""
+type AddApplicationPayload {
+  """"""
+  application(filter: ApplicationFilter, order: ApplicationOrder, first: Int, offset: Int): [Application]
+
+  """"""
+  numUids: Int
+}
+
+""""""
+type AddBomServicePayload {
+  """"""
+  bomService(filter: BomServiceFilter, order: BomServiceOrder, first: Int, offset: Int): [BomService]
+
+  """"""
+  numUids: Int
+}
+
+""""""
+type DeleteVulnerabilityPayload {
+  """"""
+  vulnerability(filter: VulnerabilityFilter, order: VulnerabilityOrder, first: Int, offset: Int): [Vulnerability]
+
+  """"""
+  msg: String
+
+  """"""
+  numUids: Int
+}
+
+""""""
+type UpdateVulnerabilityAdvisoryPayload {
+  """"""
+  vulnerabilityAdvisory(filter: VulnerabilityAdvisoryFilter, order: VulnerabilityAdvisoryOrder, first: Int, offset: Int): [VulnerabilityAdvisory]
+
+  """"""
+  numUids: Int
+}
+
+""""""
+enum BomMetadataOrderable {
+  """"""
+  timestamp
+}
+
+""""""
+enum BomServiceDataHasFilter {
+  """"""
+  data
+
+  """"""
+  flow
+
+  """"""
+  classification
+}
+
+""""""
+input AddComponentInput {
+  """Is this a root component?"""
+  isRoot: Boolean
+
+  """Unique BOM Reference"""
+  bomRef: String!
+
+  """Group"""
+  group: String!
+
+  """Name of the component"""
+  name: String!
+
+  """Description"""
+  description: String
+
+  """Component type"""
+  ctype: String
+
+  """Sub path"""
+  subPath: String
+
+  """Repository URL"""
+  repoUrl: String
+
+  """Download URL"""
+  downloadUrl: String
+
+  """Publisher"""
+  publisher: String
+
+  """"""
+  licenses: [ComponentLicenseRef]
+
+  """Component scope such as required, optional, excluded"""
+  scope: String
+
+  """Version"""
+  version: String!
+
+  """Package URL"""
+  purl: String!
+
+  """"""
+  vulnerabilities: [VulnerabilityRef]
+
+  """"""
+  properties: [PropertiesRef]
+
+  """"""
+  dependency: [ComponentRef]
+
+  """"""
+  appearsIn: [BomRef]
+}
+
+""""""
+input UpdateTeamInput {
+  """"""
+  filter: TeamFilter!
+
+  """"""
+  set: TeamPatch
+
+  """"""
+  remove: TeamPatch
+}
+
+""""""
+input PointRef {
+  """"""
+  longitude: Float!
+
+  """"""
+  latitude: Float!
 }
 
 """"""
@@ -431,48 +1330,201 @@ input StringRegExpFilter {
 }
 
 """"""
-input UserPatch {
+type UpdateVulnerabilityAnalysisPayload {
   """"""
-  email: String
+  vulnerabilityAnalysis(filter: VulnerabilityAnalysisFilter, order: VulnerabilityAnalysisOrder, first: Int, offset: Int): [VulnerabilityAnalysis]
 
   """"""
-  fullName: String
+  numUids: Int
+}
 
-  """"""
-  created: DateTime
+"""Vulnerability source"""
+type VulnerabilitySource {
+  """Name such as NVD, GitHub"""
+  name: String
 
-  """"""
-  modified: DateTime
-
-  """"""
-  teams: [TeamRef]
-
-  """"""
-  roles: [UserRoleRef]
-
-  """"""
-  disabled: Boolean
-
-  """"""
-  password: String
+  """URL"""
+  url: String
 }
 
 """"""
-input VulnerabilityAnalysisPatch {
+input AuthRule {
   """"""
-  state: String
+  and: [AuthRule]
 
   """"""
-  detail: String
+  or: [AuthRule]
+
+  """"""
+  not: AuthRule
+
+  """"""
+  rule: String
 }
 
 """"""
-input Severity_hash {
+input CustomHTTP {
   """"""
-  eq: Severity
+  url: String!
 
   """"""
-  in: [Severity]
+  method: HTTPMethod!
+
+  """"""
+  body: String
+
+  """"""
+  graphql: String
+
+  """"""
+  mode: Mode
+
+  """"""
+  forwardHeaders: [String!]
+
+  """"""
+  secretHeaders: [String!]
+
+  """"""
+  introspectionHeaders: [String!]
+
+  """"""
+  skipIntrospection: Boolean
+}
+
+""""""
+enum VulnerabilitySourceOrderable {
+  """"""
+  name
+
+  """"""
+  url
+}
+
+""""""
+input UpdateUserRoleInput {
+  """"""
+  filter: UserRoleFilter!
+
+  """"""
+  set: UserRolePatch
+
+  """"""
+  remove: UserRolePatch
+}
+
+"""Vulnerability version and its status"""
+type VulnerabilityVersionStatus {
+  """Version string"""
+  version: String!
+
+  """Version type such as semver"""
+  versionType: String
+
+  """Repository"""
+  repo: String
+
+  """"""
+  lessThanOrEqual: String
+
+  """"""
+  lessThan: String
+
+  """List of changes"""
+  changes(filter: VulnerabilityVersionChangesFilter, order: VulnerabilityVersionChangesOrder, first: Int, offset: Int): [VulnerabilityVersionChanges]
+
+  """Status"""
+  status: VulnerabilityVersionStatusEnum!
+
+  """"""
+  changesAggregate(filter: VulnerabilityVersionChangesFilter): VulnerabilityVersionChangesAggregateResult
+}
+
+""""""
+enum ComponentOrderable {
+  """"""
+  bomRef
+
+  """"""
+  group
+
+  """"""
+  name
+
+  """"""
+  description
+
+  """"""
+  ctype
+
+  """"""
+  subPath
+
+  """"""
+  repoUrl
+
+  """"""
+  downloadUrl
+
+  """"""
+  publisher
+
+  """"""
+  scope
+
+  """"""
+  version
+
+  """"""
+  purl
+}
+
+""""""
+type AddTeamPayload {
+  """"""
+  team(filter: TeamFilter, order: TeamOrder, first: Int, offset: Int): [Team]
+
+  """"""
+  numUids: Int
+}
+
+""""""
+type DeleteVulnerabilityAnalysisPayload {
+  """"""
+  vulnerabilityAnalysis(filter: VulnerabilityAnalysisFilter, order: VulnerabilityAnalysisOrder, first: Int, offset: Int): [VulnerabilityAnalysis]
+
+  """"""
+  msg: String
+
+  """"""
+  numUids: Int
+}
+
+""""""
+type VulnerabilityAdvisoryAggregateResult {
+  """"""
+  count: Int
+
+  """"""
+  titleMin: String
+
+  """"""
+  titleMax: String
+
+  """"""
+  urlMin: String
+
+  """"""
+  urlMax: String
+}
+
+""""""
+enum VulnerabilityRatingOrderable {
+  """"""
+  score
+
+  """"""
+  method
 }
 
 """"""
@@ -485,6 +1537,99 @@ input UpdateVulnerabilityRatingInput {
 
   """"""
   remove: VulnerabilityRatingPatch
+}
+
+""""""
+input VulnerabilityRatingPatch {
+  """Severity such as critical, high"""
+  severity: Severity
+
+  """Score"""
+  score: Float
+
+  """Method used to determine the score"""
+  method: String
+}
+
+""""""
+input StringHashFilter {
+  """"""
+  eq: String
+
+  """"""
+  in: [String]
+}
+
+""""""
+input TeamOrder {
+  """"""
+  asc: TeamOrderable
+
+  """"""
+  desc: TeamOrderable
+
+  """"""
+  then: TeamOrder
+}
+
+""""""
+input UpdatePropertiesInput {
+  """"""
+  filter: PropertiesFilter!
+
+  """"""
+  set: PropertiesPatch
+
+  """"""
+  remove: PropertiesPatch
+}
+
+""""""
+input UserRolePatch {
+  """"""
+  user: UserRef
+
+  """"""
+  team: TeamRef
+
+  """Role string. Example: administrator, developer, security"""
+  role: String
+
+  """Creation date"""
+  created: DateTime
+
+  """Modified date"""
+  modified: DateTime
+
+  """Is this role disabled?"""
+  disabled: Boolean
+}
+
+""""""
+type AddVulnerabilityPayload {
+  """"""
+  vulnerability(filter: VulnerabilityFilter, order: VulnerabilityOrder, first: Int, offset: Int): [Vulnerability]
+
+  """"""
+  numUids: Int
+}
+
+""""""
+type UpdateApplicationPayload {
+  """"""
+  application(filter: ApplicationFilter, order: ApplicationOrder, first: Int, offset: Int): [Application]
+
+  """"""
+  numUids: Int
+}
+
+""""""
+type UpdateApplicationVersionPayload {
+  """"""
+  applicationVersion(filter: ApplicationVersionFilter, order: ApplicationVersionOrder, first: Int, offset: Int): [ApplicationVersion]
+
+  """"""
+  numUids: Int
 }
 
 """"""
@@ -542,4131 +1687,6 @@ enum ScanResultHasFilter {
 }
 
 """"""
-enum UserRoleHasFilter {
-  """"""
-  id
-
-  """"""
-  user
-
-  """"""
-  team
-
-  """"""
-  role
-
-  """"""
-  created
-
-  """"""
-  modified
-
-  """"""
-  disabled
-}
-
-""""""
-input ScanRef {
-  """"""
-  id: String
-
-  """"""
-  isScheduled: Boolean
-
-  """"""
-  invokedBy: UserRef
-
-  """"""
-  created: DateTime
-
-  """"""
-  validUntil: DateTime
-
-  """"""
-  applications: [ApplicationRef]
-
-  """"""
-  tags: [String]
-
-  """"""
-  result: ScanResultRef
-
-  """"""
-  url: String
-}
-
-""""""
-input TeamOrder {
-  """"""
-  asc: TeamOrderable
-
-  """"""
-  desc: TeamOrderable
-
-  """"""
-  then: TeamOrder
-}
-
-""""""
-enum Severity {
-  """"""
-  critical
-
-  """"""
-  high
-
-  """"""
-  medium
-
-  """"""
-  low
-
-  """"""
-  info
-
-  """"""
-  none
-
-  """"""
-  unknown
-}
-
-""""""
-type BomServiceAggregateResult {
-  """"""
-  count: Int
-
-  """"""
-  bomRefMin: String
-
-  """"""
-  bomRefMax: String
-
-  """"""
-  groupMin: String
-
-  """"""
-  groupMax: String
-
-  """"""
-  nameMin: String
-
-  """"""
-  nameMax: String
-
-  """"""
-  versionMin: String
-
-  """"""
-  versionMax: String
-
-  """"""
-  descriptionMin: String
-
-  """"""
-  descriptionMax: String
-}
-
-""""""
-input StringFullTextFilter {
-  """"""
-  alloftext: String
-
-  """"""
-  anyoftext: String
-}
-
-""""""
-type BomMetadataAggregateResult {
-  """"""
-  count: Int
-
-  """"""
-  timestampMin: DateTime
-
-  """"""
-  timestampMax: DateTime
-}
-
-""""""
-type DeleteComponentLicensePayload {
-  """"""
-  componentLicense(filter: ComponentLicenseFilter, order: ComponentLicenseOrder, first: Int, offset: Int): [ComponentLicense]
-
-  """"""
-  msg: String
-
-  """"""
-  numUids: Int
-}
-
-""""""
-enum VulnerabilityVersionStatusOrderable {
-  """"""
-  version
-
-  """"""
-  versionType
-
-  """"""
-  repo
-
-  """"""
-  lessThanOrEqual
-
-  """"""
-  lessThan
-}
-
-""""""
-input AddPropertiesInput {
-  """"""
-  name: String!
-
-  """"""
-  value: String!
-}
-
-""""""
-input BomRef {
-  """"""
-  serialNumber: String
-
-  """"""
-  metadata: BomMetadataRef
-
-  """"""
-  components: [ComponentRef!]
-
-  """"""
-  services: [BomServiceRef]
-
-  """"""
-  application: ApplicationRef
-
-  """"""
-  scan: ScanRef
-
-  """"""
-  vulnerabilities: [VulnerabilityRef]
-}
-
-""""""
-type VulnerabilityVersionStatus {
-  """"""
-  version: String!
-
-  """"""
-  versionType: String
-
-  """"""
-  repo: String
-
-  """"""
-  lessThanOrEqual: String
-
-  """"""
-  lessThan: String
-
-  """"""
-  changes(filter: VulnerabilityVersionChangesFilter, order: VulnerabilityVersionChangesOrder, first: Int, offset: Int): [VulnerabilityVersionChanges]
-
-  """"""
-  status: VulnerabilityVersionStatusEnum!
-
-  """"""
-  changesAggregate(filter: VulnerabilityVersionChangesFilter): VulnerabilityVersionChangesAggregateResult
-}
-
-""""""
-enum ScanHasFilter {
-  """"""
-  id
-
-  """"""
-  isScheduled
-
-  """"""
-  invokedBy
-
-  """"""
-  created
-
-  """"""
-  validUntil
-
-  """"""
-  applications
-
-  """"""
-  tags
-
-  """"""
-  result
-
-  """"""
-  url
-}
-
-""""""
-input BomServiceDataFilter {
-  """"""
-  has: [BomServiceDataHasFilter]
-
-  """"""
-  and: [BomServiceDataFilter]
-
-  """"""
-  or: [BomServiceDataFilter]
-
-  """"""
-  not: BomServiceDataFilter
-}
-
-""""""
-input BomServiceRef {
-  """"""
-  bomRef: String
-
-  """"""
-  group: String
-
-  """"""
-  name: String
-
-  """"""
-  version: String
-
-  """"""
-  description: String
-
-  """"""
-  endpoints: [String]
-
-  """"""
-  authenticated: Boolean
-
-  """"""
-  xTrustBoundary: Boolean
-
-  """"""
-  data: [BomServiceDataRef]
-
-  """"""
-  licenses: [ComponentLicenseRef]
-
-  """"""
-  services: [BomServiceRef]
-
-  """"""
-  properties: [PropertiesRef]
-}
-
-""""""
-input VulnerabilityAnalysisOrder {
-  """"""
-  asc: VulnerabilityAnalysisOrderable
-
-  """"""
-  desc: VulnerabilityAnalysisOrderable
-
-  """"""
-  then: VulnerabilityAnalysisOrder
-}
-
-""""""
-type AddBomServicePayload {
-  """"""
-  bomService(filter: BomServiceFilter, order: BomServiceOrder, first: Int, offset: Int): [BomService]
-
-  """"""
-  numUids: Int
-}
-
-""""""
-type DeleteApplicationVersionPayload {
-  """"""
-  applicationVersion(filter: ApplicationVersionFilter, order: ApplicationVersionOrder, first: Int, offset: Int): [ApplicationVersion]
-
-  """"""
-  msg: String
-
-  """"""
-  numUids: Int
-}
-
-""""""
-type UpdateScanResultPayload {
-  """"""
-  scanResult(filter: ScanResultFilter, order: ScanResultOrder, first: Int, offset: Int): [ScanResult]
-
-  """"""
-  numUids: Int
-}
-
-""""""
-type VulnerabilitySourceAggregateResult {
-  """"""
-  count: Int
-
-  """"""
-  nameMin: String
-
-  """"""
-  nameMax: String
-
-  """"""
-  urlMin: String
-
-  """"""
-  urlMax: String
-}
-
-""""""
-input ComponentPatch {
-  """"""
-  isRoot: Boolean
-
-  """"""
-  bomRef: String
-
-  """"""
-  group: String
-
-  """"""
-  name: String
-
-  """"""
-  description: String
-
-  """"""
-  ctype: String
-
-  """"""
-  subPath: String
-
-  """"""
-  repoUrl: String
-
-  """"""
-  downloadUrl: String
-
-  """"""
-  publisher: String
-
-  """"""
-  licenses: [ComponentLicenseRef]
-
-  """"""
-  scope: String
-
-  """"""
-  version: String
-
-  """"""
-  vulnerabilities: [VulnerabilityRef]
-
-  """"""
-  properties: [PropertiesRef]
-
-  """"""
-  dependency: [ComponentRef]
-
-  """"""
-  appearsIn: [BomRef]
-}
-
-""""""
-enum Mode {
-  """"""
-  BATCH
-
-  """"""
-  SINGLE
-}
-
-""""""
-type UpdateEnvironmentPayload {
-  """"""
-  environment(filter: EnvironmentFilter, order: EnvironmentOrder, first: Int, offset: Int): [Environment]
-
-  """"""
-  numUids: Int
-}
-
-""""""
-input PointRef {
-  """"""
-  longitude: Float!
-
-  """"""
-  latitude: Float!
-}
-
-""""""
-type Polygon {
-  """"""
-  coordinates: [PointList!]!
-}
-
-""""""
-enum VulnerabilitySourceOrderable {
-  """"""
-  name
-
-  """"""
-  url
-}
-
-""""""
-input BomServiceOrder {
-  """"""
-  asc: BomServiceOrderable
-
-  """"""
-  desc: BomServiceOrderable
-
-  """"""
-  then: BomServiceOrder
-}
-
-""""""
-input StringFullTextFilter_StringTermFilter {
-  """"""
-  alloftext: String
-
-  """"""
-  anyoftext: String
-
-  """"""
-  allofterms: String
-
-  """"""
-  anyofterms: String
-}
-
-""""""
-input UpdateComponentLicenseInput {
-  """"""
-  filter: ComponentLicenseFilter!
-
-  """"""
-  set: ComponentLicensePatch
-
-  """"""
-  remove: ComponentLicensePatch
-}
-
-""""""
-type User {
-  """"""
-  id: String!
-
-  """"""
-  email: String!
-
-  """"""
-  fullName: String!
-
-  """"""
-  created: DateTime
-
-  """"""
-  modified: DateTime
-
-  """"""
-  teams(filter: TeamFilter, order: TeamOrder, first: Int, offset: Int): [Team]
-
-  """"""
-  roles(filter: UserRoleFilter, order: UserRoleOrder, first: Int, offset: Int): [UserRole]
-
-  """"""
-  disabled: Boolean
-
-  """"""
-  teamsAggregate(filter: TeamFilter): TeamAggregateResult
-
-  """"""
-  rolesAggregate(filter: UserRoleFilter): UserRoleAggregateResult
-}
-
-""""""
-type VulnerabilitySource {
-  """"""
-  name: String
-
-  """"""
-  url: String
-}
-
-""""""
-input VulnerabilitySourcePatch {
-  """"""
-  name: String
-
-  """"""
-  url: String
-}
-
-""""""
-input BomOrder {
-  """"""
-  asc: BomOrderable
-
-  """"""
-  desc: BomOrderable
-
-  """"""
-  then: BomOrder
-}
-
-""""""
-input EnvironmentOrder {
-  """"""
-  asc: EnvironmentOrderable
-
-  """"""
-  desc: EnvironmentOrderable
-
-  """"""
-  then: EnvironmentOrder
-}
-
-""""""
-type Point {
-  """"""
-  longitude: Float!
-
-  """"""
-  latitude: Float!
-}
-
-""""""
-input ApplicationRef {
-  """"""
-  id: String
-
-  """"""
-  name: String
-
-  """"""
-  description: String
-
-  """"""
-  environment: EnvironmentRef
-
-  """"""
-  version: ApplicationVersionRef
-
-  """"""
-  repoUrl: String
-
-  """"""
-  issuesUrl: String
-
-  """"""
-  ciUrl: String
-
-  """"""
-  cdUrl: String
-
-  """"""
-  changeManagementUrl: String
-
-  """"""
-  languages: [String]
-
-  """"""
-  frameworks: [String]
-
-  """"""
-  classification: [String]
-
-  """"""
-  tags: [String]
-
-  """"""
-  created: DateTime
-
-  """"""
-  modified: DateTime
-
-  """"""
-  teams: [TeamRef]
-
-  """"""
-  disabled: Boolean
-}
-
-""""""
-input ComponentLicenseRef {
-  """"""
-  id: String
-
-  """"""
-  name: String
-
-  """"""
-  text: String
-
-  """"""
-  url: String
-
-  """"""
-  expression: String
-}
-
-""""""
-input UpdateBomServiceInput {
-  """"""
-  filter: BomServiceFilter!
-
-  """"""
-  set: BomServicePatch
-
-  """"""
-  remove: BomServicePatch
-}
-
-""""""
-type Query {
-  """"""
-  getUser(id: String!): User
-
-  """"""
-  checkUserPassword(id: String!, password: String!): User
-
-  """"""
-  queryUser(filter: UserFilter, order: UserOrder, first: Int, offset: Int): [User]
-
-  """"""
-  aggregateUser(filter: UserFilter): UserAggregateResult
-
-  """"""
-  getTeam(id: String!): Team
-
-  """"""
-  queryTeam(filter: TeamFilter, order: TeamOrder, first: Int, offset: Int): [Team]
-
-  """"""
-  aggregateTeam(filter: TeamFilter): TeamAggregateResult
-
-  """"""
-  getUserRole(id: String!): UserRole
-
-  """"""
-  queryUserRole(filter: UserRoleFilter, order: UserRoleOrder, first: Int, offset: Int): [UserRole]
-
-  """"""
-  aggregateUserRole(filter: UserRoleFilter): UserRoleAggregateResult
-
-  """"""
-  getScanResult(id: String!): ScanResult
-
-  """"""
-  queryScanResult(filter: ScanResultFilter, order: ScanResultOrder, first: Int, offset: Int): [ScanResult]
-
-  """"""
-  aggregateScanResult(filter: ScanResultFilter): ScanResultAggregateResult
-
-  """"""
-  getScan(id: String!): Scan
-
-  """"""
-  queryScan(filter: ScanFilter, order: ScanOrder, first: Int, offset: Int): [Scan]
-
-  """"""
-  aggregateScan(filter: ScanFilter): ScanAggregateResult
-
-  """"""
-  getEnvironment(id: String!): Environment
-
-  """"""
-  queryEnvironment(filter: EnvironmentFilter, order: EnvironmentOrder, first: Int, offset: Int): [Environment]
-
-  """"""
-  aggregateEnvironment(filter: EnvironmentFilter): EnvironmentAggregateResult
-
-  """"""
-  queryApplicationVersion(filter: ApplicationVersionFilter, order: ApplicationVersionOrder, first: Int, offset: Int): [ApplicationVersion]
-
-  """"""
-  aggregateApplicationVersion(filter: ApplicationVersionFilter): ApplicationVersionAggregateResult
-
-  """"""
-  getApplication(id: String!): Application
-
-  """"""
-  queryApplication(filter: ApplicationFilter, order: ApplicationOrder, first: Int, offset: Int): [Application]
-
-  """"""
-  aggregateApplication(filter: ApplicationFilter): ApplicationAggregateResult
-
-  """"""
-  queryProperties(filter: PropertiesFilter, order: PropertiesOrder, first: Int, offset: Int): [Properties]
-
-  """"""
-  aggregateProperties(filter: PropertiesFilter): PropertiesAggregateResult
-
-  """"""
-  queryBomMetadata(filter: BomMetadataFilter, order: BomMetadataOrder, first: Int, offset: Int): [BomMetadata]
-
-  """"""
-  aggregateBomMetadata(filter: BomMetadataFilter): BomMetadataAggregateResult
-
-  """"""
-  queryComponentLicense(filter: ComponentLicenseFilter, order: ComponentLicenseOrder, first: Int, offset: Int): [ComponentLicense]
-
-  """"""
-  aggregateComponentLicense(filter: ComponentLicenseFilter): ComponentLicenseAggregateResult
-
-  """"""
-  getComponent(purl: String!): Component
-
-  """"""
-  queryComponent(filter: ComponentFilter, order: ComponentOrder, first: Int, offset: Int): [Component]
-
-  """"""
-  aggregateComponent(filter: ComponentFilter): ComponentAggregateResult
-
-  """"""
-  queryBomServiceData(filter: BomServiceDataFilter, order: BomServiceDataOrder, first: Int, offset: Int): [BomServiceData]
-
-  """"""
-  aggregateBomServiceData(filter: BomServiceDataFilter): BomServiceDataAggregateResult
-
-  """"""
-  queryBomService(filter: BomServiceFilter, order: BomServiceOrder, first: Int, offset: Int): [BomService]
-
-  """"""
-  aggregateBomService(filter: BomServiceFilter): BomServiceAggregateResult
-
-  """"""
-  getBom(serialNumber: String!): Bom
-
-  """"""
-  queryBom(filter: BomFilter, order: BomOrder, first: Int, offset: Int): [Bom]
-
-  """"""
-  aggregateBom(filter: BomFilter): BomAggregateResult
-
-  """"""
-  queryVulnerabilityVersionChanges(filter: VulnerabilityVersionChangesFilter, order: VulnerabilityVersionChangesOrder, first: Int, offset: Int): [VulnerabilityVersionChanges]
-
-  """"""
-  aggregateVulnerabilityVersionChanges(filter: VulnerabilityVersionChangesFilter): VulnerabilityVersionChangesAggregateResult
-
-  """"""
-  queryVulnerabilityVersionStatus(filter: VulnerabilityVersionStatusFilter, order: VulnerabilityVersionStatusOrder, first: Int, offset: Int): [VulnerabilityVersionStatus]
-
-  """"""
-  aggregateVulnerabilityVersionStatus(filter: VulnerabilityVersionStatusFilter): VulnerabilityVersionStatusAggregateResult
-
-  """"""
-  queryVulnerabilityDetail(filter: VulnerabilityDetailFilter, order: VulnerabilityDetailOrder, first: Int, offset: Int): [VulnerabilityDetail]
-
-  """"""
-  aggregateVulnerabilityDetail(filter: VulnerabilityDetailFilter): VulnerabilityDetailAggregateResult
-
-  """"""
-  queryVulnerabilitySource(filter: VulnerabilitySourceFilter, order: VulnerabilitySourceOrder, first: Int, offset: Int): [VulnerabilitySource]
-
-  """"""
-  aggregateVulnerabilitySource(filter: VulnerabilitySourceFilter): VulnerabilitySourceAggregateResult
-
-  """"""
-  queryVulnerabilityAdvisory(filter: VulnerabilityAdvisoryFilter, order: VulnerabilityAdvisoryOrder, first: Int, offset: Int): [VulnerabilityAdvisory]
-
-  """"""
-  aggregateVulnerabilityAdvisory(filter: VulnerabilityAdvisoryFilter): VulnerabilityAdvisoryAggregateResult
-
-  """"""
-  queryVulnerabilityRating(filter: VulnerabilityRatingFilter, order: VulnerabilityRatingOrder, first: Int, offset: Int): [VulnerabilityRating]
-
-  """"""
-  aggregateVulnerabilityRating(filter: VulnerabilityRatingFilter): VulnerabilityRatingAggregateResult
-
-  """"""
-  queryVulnerabilityAnalysis(filter: VulnerabilityAnalysisFilter, order: VulnerabilityAnalysisOrder, first: Int, offset: Int): [VulnerabilityAnalysis]
-
-  """"""
-  aggregateVulnerabilityAnalysis(filter: VulnerabilityAnalysisFilter): VulnerabilityAnalysisAggregateResult
-
-  """"""
-  getVulnerability(bomRef: String!): Vulnerability
-
-  """"""
-  queryVulnerability(filter: VulnerabilityFilter, order: VulnerabilityOrder, first: Int, offset: Int): [Vulnerability]
-
-  """"""
-  aggregateVulnerability(filter: VulnerabilityFilter): VulnerabilityAggregateResult
-}
-
-""""""
-type UpdateBomMetadataPayload {
-  """"""
-  bomMetadata(filter: BomMetadataFilter, order: BomMetadataOrder, first: Int, offset: Int): [BomMetadata]
-
-  """"""
-  numUids: Int
-}
-
-""""""
-type UpdateBomPayload {
-  """"""
-  bom(filter: BomFilter, order: BomOrder, first: Int, offset: Int): [Bom]
-
-  """"""
-  numUids: Int
-}
-
-""""""
-type ComponentLicense {
-  """"""
-  id: String
-
-  """"""
-  name: String
-
-  """"""
-  text: String
-
-  """"""
-  url: String
-
-  """"""
-  expression: String
-}
-
-""""""
-type VulnerabilityRatingAggregateResult {
-  """"""
-  count: Int
-
-  """"""
-  scoreMin: Float
-
-  """"""
-  scoreMax: Float
-
-  """"""
-  scoreSum: Float
-
-  """"""
-  scoreAvg: Float
-
-  """"""
-  methodMin: String
-
-  """"""
-  methodMax: String
-}
-
-""""""
-input BomServiceDataOrder {
-  """"""
-  asc: BomServiceDataOrderable
-
-  """"""
-  desc: BomServiceDataOrderable
-
-  """"""
-  then: BomServiceDataOrder
-}
-
-""""""
-type Scan {
-  """"""
-  id: String!
-
-  """"""
-  isScheduled: Boolean
-
-  """"""
-  invokedBy(filter: UserFilter): User
-
-  """"""
-  created: DateTime
-
-  """"""
-  validUntil: DateTime
-
-  """"""
-  applications(filter: ApplicationFilter, order: ApplicationOrder, first: Int, offset: Int): [Application]
-
-  """"""
-  tags: [String]
-
-  """"""
-  result(filter: ScanResultFilter): ScanResult
-
-  """"""
-  url: String
-
-  """"""
-  applicationsAggregate(filter: ApplicationFilter): ApplicationAggregateResult
-}
-
-""""""
-enum VulnerabilityVersionStatusHasFilter {
-  """"""
-  version
-
-  """"""
-  versionType
-
-  """"""
-  repo
-
-  """"""
-  lessThanOrEqual
-
-  """"""
-  lessThan
-
-  """"""
-  changes
-
-  """"""
-  status
-}
-
-""""""
-input VulnerabilityRef {
-  """"""
-  bomRef: String
-
-  """"""
-  id: String
-
-  """"""
-  source: VulnerabilitySourceRef
-
-  """"""
-  ratings: [VulnerabilityRatingRef]
-
-  """"""
-  severity: Severity
-
-  """"""
-  cvss_score: Float
-
-  """"""
-  cwes: [Int]
-
-  """"""
-  description: String
-
-  """"""
-  recommendation: String
-
-  """"""
-  advisories: [VulnerabilityAdvisoryRef]
-
-  """"""
-  analysis: VulnerabilityAnalysisRef
-
-  """"""
-  affects: [ComponentRef]
-
-  """"""
-  version: String
-
-  """"""
-  fix_version: String
-
-  """"""
-  properties: [PropertiesRef]
-
-  """"""
-  detail: VulnerabilityDetailRef
-}
-
-""""""
-type UpdateVulnerabilityVersionStatusPayload {
-  """"""
-  vulnerabilityVersionStatus(filter: VulnerabilityVersionStatusFilter, order: VulnerabilityVersionStatusOrder, first: Int, offset: Int): [VulnerabilityVersionStatus]
-
-  """"""
-  numUids: Int
-}
-
-""""""
-type UserRoleAggregateResult {
-  """"""
-  count: Int
-
-  """"""
-  idMin: String
-
-  """"""
-  idMax: String
-
-  """"""
-  roleMin: String
-
-  """"""
-  roleMax: String
-
-  """"""
-  createdMin: DateTime
-
-  """"""
-  createdMax: DateTime
-
-  """"""
-  modifiedMin: DateTime
-
-  """"""
-  modifiedMax: DateTime
-}
-
-""""""
-type DeleteBomMetadataPayload {
-  """"""
-  bomMetadata(filter: BomMetadataFilter, order: BomMetadataOrder, first: Int, offset: Int): [BomMetadata]
-
-  """"""
-  msg: String
-
-  """"""
-  numUids: Int
-}
-
-""""""
-enum ScanResultOrderable {
-  """"""
-  id
-
-  """"""
-  created
-
-  """"""
-  validUntil
-
-  """"""
-  url
-
-  """"""
-  htmlUrl
-
-  """"""
-  csvUrl
-
-  """"""
-  pdfUrl
-}
-
-""""""
-input EnvironmentRef {
-  """"""
-  id: String
-
-  """"""
-  name: String
-
-  """"""
-  description: String
-
-  """"""
-  tags: [String]
-
-  """"""
-  url: String
-
-  """"""
-  users: [UserRef]
-
-  """"""
-  teams: [TeamRef]
-}
-
-""""""
-type Team {
-  """"""
-  id: String!
-
-  """"""
-  name: String!
-
-  """"""
-  description: String
-
-  """"""
-  tags: [String]
-
-  """"""
-  users(filter: UserFilter, order: UserOrder, first: Int, offset: Int): [User]
-
-  """"""
-  applications(filter: ApplicationFilter, order: ApplicationOrder, first: Int, offset: Int): [Application]
-
-  """"""
-  created: DateTime
-
-  """"""
-  modified: DateTime
-
-  """"""
-  disabled: Boolean
-
-  """"""
-  usersAggregate(filter: UserFilter): UserAggregateResult
-
-  """"""
-  applicationsAggregate(filter: ApplicationFilter): ApplicationAggregateResult
-}
-
-""""""
-type BomAggregateResult {
-  """"""
-  count: Int
-
-  """"""
-  serialNumberMin: String
-
-  """"""
-  serialNumberMax: String
-}
-
-""""""
-type UpdateVulnerabilityDetailPayload {
-  """"""
-  vulnerabilityDetail(filter: VulnerabilityDetailFilter, order: VulnerabilityDetailOrder, first: Int, offset: Int): [VulnerabilityDetail]
-
-  """"""
-  numUids: Int
-}
-
-""""""
-input AddApplicationVersionInput {
-  """"""
-  branch: String
-
-  """"""
-  release: String
-
-  """"""
-  tag: String
-}
-
-""""""
-input AddScanInput {
-  """"""
-  id: String!
-
-  """"""
-  isScheduled: Boolean
-
-  """"""
-  invokedBy: UserRef
-
-  """"""
-  created: DateTime
-
-  """"""
-  validUntil: DateTime
-
-  """"""
-  applications: [ApplicationRef]
-
-  """"""
-  tags: [String]
-
-  """"""
-  result: ScanResultRef
-
-  """"""
-  url: String
-}
-
-""""""
-input ScanFilter {
-  """"""
-  id: StringHashFilter
-
-  """"""
-  has: [ScanHasFilter]
-
-  """"""
-  and: [ScanFilter]
-
-  """"""
-  or: [ScanFilter]
-
-  """"""
-  not: ScanFilter
-}
-
-""""""
-input UpdateBomMetadataInput {
-  """"""
-  filter: BomMetadataFilter!
-
-  """"""
-  set: BomMetadataPatch
-
-  """"""
-  remove: BomMetadataPatch
-}
-
-""""""
-input PolygonGeoFilter {
-  """"""
-  near: NearFilter
-
-  """"""
-  within: WithinFilter
-
-  """"""
-  contains: ContainsFilter
-
-  """"""
-  intersects: IntersectsFilter
-}
-
-""""""
-type AddVulnerabilityVersionChangesPayload {
-  """"""
-  vulnerabilityVersionChanges(filter: VulnerabilityVersionChangesFilter, order: VulnerabilityVersionChangesOrder, first: Int, offset: Int): [VulnerabilityVersionChanges]
-
-  """"""
-  numUids: Int
-}
-
-""""""
-type AddVulnerabilityPayload {
-  """"""
-  vulnerability(filter: VulnerabilityFilter, order: VulnerabilityOrder, first: Int, offset: Int): [Vulnerability]
-
-  """"""
-  numUids: Int
-}
-
-""""""
-type ApplicationAggregateResult {
-  """"""
-  count: Int
-
-  """"""
-  idMin: String
-
-  """"""
-  idMax: String
-
-  """"""
-  nameMin: String
-
-  """"""
-  nameMax: String
-
-  """"""
-  descriptionMin: String
-
-  """"""
-  descriptionMax: String
-
-  """"""
-  repoUrlMin: String
-
-  """"""
-  repoUrlMax: String
-
-  """"""
-  issuesUrlMin: String
-
-  """"""
-  issuesUrlMax: String
-
-  """"""
-  ciUrlMin: String
-
-  """"""
-  ciUrlMax: String
-
-  """"""
-  cdUrlMin: String
-
-  """"""
-  cdUrlMax: String
-
-  """"""
-  changeManagementUrlMin: String
-
-  """"""
-  changeManagementUrlMax: String
-
-  """"""
-  createdMin: DateTime
-
-  """"""
-  createdMax: DateTime
-
-  """"""
-  modifiedMin: DateTime
-
-  """"""
-  modifiedMax: DateTime
-}
-
-""""""
-type DeleteVulnerabilityPayload {
-  """"""
-  vulnerability(filter: VulnerabilityFilter, order: VulnerabilityOrder, first: Int, offset: Int): [Vulnerability]
-
-  """"""
-  msg: String
-
-  """"""
-  numUids: Int
-}
-
-""""""
-input UpdateScanInput {
-  """"""
-  filter: ScanFilter!
-
-  """"""
-  set: ScanPatch
-
-  """"""
-  remove: ScanPatch
-}
-
-""""""
-input UpdateVulnerabilityInput {
-  """"""
-  filter: VulnerabilityFilter!
-
-  """"""
-  set: VulnerabilityPatch
-
-  """"""
-  remove: VulnerabilityPatch
-}
-
-""""""
-input UpdateVulnerabilityVersionStatusInput {
-  """"""
-  filter: VulnerabilityVersionStatusFilter!
-
-  """"""
-  set: VulnerabilityVersionStatusPatch
-
-  """"""
-  remove: VulnerabilityVersionStatusPatch
-}
-
-""""""
-type Application {
-  """"""
-  id: String!
-
-  """"""
-  name: String!
-
-  """"""
-  description: String
-
-  """"""
-  environment(filter: EnvironmentFilter): Environment
-
-  """"""
-  version(filter: ApplicationVersionFilter): ApplicationVersion
-
-  """"""
-  repoUrl: String
-
-  """"""
-  issuesUrl: String
-
-  """"""
-  ciUrl: String
-
-  """"""
-  cdUrl: String
-
-  """"""
-  changeManagementUrl: String
-
-  """"""
-  languages: [String]
-
-  """"""
-  frameworks: [String]
-
-  """"""
-  classification: [String]
-
-  """"""
-  tags: [String]
-
-  """"""
-  created: DateTime
-
-  """"""
-  modified: DateTime
-
-  """"""
-  teams(filter: TeamFilter, order: TeamOrder, first: Int, offset: Int): [Team]
-
-  """"""
-  disabled: Boolean
-
-  """"""
-  teamsAggregate(filter: TeamFilter): TeamAggregateResult
-}
-
-""""""
-input IntFilter {
-  """"""
-  eq: Int
-
-  """"""
-  in: [Int]
-
-  """"""
-  le: Int
-
-  """"""
-  lt: Int
-
-  """"""
-  ge: Int
-
-  """"""
-  gt: Int
-
-  """"""
-  between: IntRange
-}
-
-""""""
-enum TeamOrderable {
-  """"""
-  id
-
-  """"""
-  name
-
-  """"""
-  description
-
-  """"""
-  created
-
-  """"""
-  modified
-}
-
-""""""
-input StringHashFilter_StringTermFilter {
-  """"""
-  eq: String
-
-  """"""
-  in: [String]
-
-  """"""
-  allofterms: String
-
-  """"""
-  anyofterms: String
-}
-
-""""""
-input TeamFilter {
-  """"""
-  id: StringHashFilter
-
-  """"""
-  name: StringTermFilter
-
-  """"""
-  description: StringFullTextFilter_StringTermFilter
-
-  """"""
-  has: [TeamHasFilter]
-
-  """"""
-  and: [TeamFilter]
-
-  """"""
-  or: [TeamFilter]
-
-  """"""
-  not: TeamFilter
-}
-
-""""""
-input UpdateUserInput {
-  """"""
-  filter: UserFilter!
-
-  """"""
-  set: UserPatch
-
-  """"""
-  remove: UserPatch
-}
-
-""""""
-input VulnerabilityDetailFilter {
-  """"""
-  title: StringTermFilter
-
-  """"""
-  summary: StringFullTextFilter_StringTermFilter
-
-  """"""
-  has: [VulnerabilityDetailHasFilter]
-
-  """"""
-  and: [VulnerabilityDetailFilter]
-
-  """"""
-  or: [VulnerabilityDetailFilter]
-
-  """"""
-  not: VulnerabilityDetailFilter
-}
-
-""""""
-type BomServiceDataAggregateResult {
-  """"""
-  count: Int
-
-  """"""
-  dataMin: String
-
-  """"""
-  dataMax: String
-}
-
-""""""
-type VulnerabilityAdvisoryAggregateResult {
-  """"""
-  count: Int
-
-  """"""
-  titleMin: String
-
-  """"""
-  titleMax: String
-
-  """"""
-  urlMin: String
-
-  """"""
-  urlMax: String
-}
-
-""""""
-input VulnerabilityPatch {
-  """"""
-  id: String
-
-  """"""
-  source: VulnerabilitySourceRef
-
-  """"""
-  ratings: [VulnerabilityRatingRef]
-
-  """"""
-  severity: Severity
-
-  """"""
-  cvss_score: Float
-
-  """"""
-  cwes: [Int]
-
-  """"""
-  description: String
-
-  """"""
-  recommendation: String
-
-  """"""
-  advisories: [VulnerabilityAdvisoryRef]
-
-  """"""
-  analysis: VulnerabilityAnalysisRef
-
-  """"""
-  affects: [ComponentRef]
-
-  """"""
-  version: String
-
-  """"""
-  fix_version: String
-
-  """"""
-  properties: [PropertiesRef]
-
-  """"""
-  detail: VulnerabilityDetailRef
-}
-
-""""""
-input AddVulnerabilityVersionChangesInput {
-  """"""
-  at: String!
-
-  """"""
-  status: VulnerabilityVersionStatusEnum!
-}
-
-""""""
-enum BomServiceDataOrderable {
-  """"""
-  data
-}
-
-""""""
-enum VulnerabilityAdvisoryOrderable {
-  """"""
-  title
-
-  """"""
-  url
-}
-
-""""""
-enum VulnerabilityHasFilter {
-  """"""
-  bomRef
-
-  """"""
-  id
-
-  """"""
-  source
-
-  """"""
-  ratings
-
-  """"""
-  severity
-
-  """"""
-  cvss_score
-
-  """"""
-  cwes
-
-  """"""
-  description
-
-  """"""
-  recommendation
-
-  """"""
-  advisories
-
-  """"""
-  analysis
-
-  """"""
-  affects
-
-  """"""
-  version
-
-  """"""
-  fix_version
-
-  """"""
-  properties
-
-  """"""
-  detail
-}
-
-""""""
-enum VulnerabilityVersionChangesOrderable {
-  """"""
-  at
-}
-
-""""""
-input ApplicationPatch {
-  """"""
-  name: String
-
-  """"""
-  description: String
-
-  """"""
-  environment: EnvironmentRef
-
-  """"""
-  version: ApplicationVersionRef
-
-  """"""
-  repoUrl: String
-
-  """"""
-  issuesUrl: String
-
-  """"""
-  ciUrl: String
-
-  """"""
-  cdUrl: String
-
-  """"""
-  changeManagementUrl: String
-
-  """"""
-  languages: [String]
-
-  """"""
-  frameworks: [String]
-
-  """"""
-  classification: [String]
-
-  """"""
-  tags: [String]
-
-  """"""
-  created: DateTime
-
-  """"""
-  modified: DateTime
-
-  """"""
-  teams: [TeamRef]
-
-  """"""
-  disabled: Boolean
-}
-
-""""""
-input UserRoleRef {
-  """"""
-  id: String
-
-  """"""
-  user: UserRef
-
-  """"""
-  team: TeamRef
-
-  """"""
-  role: String
-
-  """"""
-  created: DateTime
-
-  """"""
-  modified: DateTime
-
-  """"""
-  disabled: Boolean
-}
-
-""""""
-type AddEnvironmentPayload {
-  """"""
-  environment(filter: EnvironmentFilter, order: EnvironmentOrder, first: Int, offset: Int): [Environment]
-
-  """"""
-  numUids: Int
-}
-
-""""""
-type AddVulnerabilityVersionStatusPayload {
-  """"""
-  vulnerabilityVersionStatus(filter: VulnerabilityVersionStatusFilter, order: VulnerabilityVersionStatusOrder, first: Int, offset: Int): [VulnerabilityVersionStatus]
-
-  """"""
-  numUids: Int
-}
-
-""""""
-type DeleteApplicationPayload {
-  """"""
-  application(filter: ApplicationFilter, order: ApplicationOrder, first: Int, offset: Int): [Application]
-
-  """"""
-  msg: String
-
-  """"""
-  numUids: Int
-}
-
-""""""
-type DeleteScanResultPayload {
-  """"""
-  scanResult(filter: ScanResultFilter, order: ScanResultOrder, first: Int, offset: Int): [ScanResult]
-
-  """"""
-  msg: String
-
-  """"""
-  numUids: Int
-}
-
-""""""
-type UpdateTeamPayload {
-  """"""
-  team(filter: TeamFilter, order: TeamOrder, first: Int, offset: Int): [Team]
-
-  """"""
-  numUids: Int
-}
-
-""""""
-type VulnerabilityVersionStatusAggregateResult {
-  """"""
-  count: Int
-
-  """"""
-  versionMin: String
-
-  """"""
-  versionMax: String
-
-  """"""
-  versionTypeMin: String
-
-  """"""
-  versionTypeMax: String
-
-  """"""
-  repoMin: String
-
-  """"""
-  repoMax: String
-
-  """"""
-  lessThanOrEqualMin: String
-
-  """"""
-  lessThanOrEqualMax: String
-
-  """"""
-  lessThanMin: String
-
-  """"""
-  lessThanMax: String
-}
-
-""""""
-enum PropertiesOrderable {
-  """"""
-  name
-
-  """"""
-  value
-}
-
-""""""
-input ApplicationVersionRef {
-  """"""
-  branch: String
-
-  """"""
-  release: String
-
-  """"""
-  tag: String
-}
-
-""""""
-enum DgraphIndex {
-  """"""
-  int
-
-  """"""
-  int64
-
-  """"""
-  float
-
-  """"""
-  bool
-
-  """"""
-  hash
-
-  """"""
-  exact
-
-  """"""
-  term
-
-  """"""
-  fulltext
-
-  """"""
-  trigram
-
-  """"""
-  regexp
-
-  """"""
-  year
-
-  """"""
-  month
-
-  """"""
-  day
-
-  """"""
-  hour
-
-  """"""
-  geo
-}
-
-""""""
-type AddApplicationVersionPayload {
-  """"""
-  applicationVersion(filter: ApplicationVersionFilter, order: ApplicationVersionOrder, first: Int, offset: Int): [ApplicationVersion]
-
-  """"""
-  numUids: Int
-}
-
-""""""
-input UserRolePatch {
-  """"""
-  user: UserRef
-
-  """"""
-  team: TeamRef
-
-  """"""
-  role: String
-
-  """"""
-  created: DateTime
-
-  """"""
-  modified: DateTime
-
-  """"""
-  disabled: Boolean
-}
-
-""""""
-input BomServiceDataRef {
-  """"""
-  data: String
-
-  """"""
-  flow: [String]
-
-  """"""
-  classification: [String]
-}
-
-""""""
-input TeamPatch {
-  """"""
-  name: String
-
-  """"""
-  description: String
-
-  """"""
-  tags: [String]
-
-  """"""
-  users: [UserRef]
-
-  """"""
-  applications: [ApplicationRef]
-
-  """"""
-  created: DateTime
-
-  """"""
-  modified: DateTime
-
-  """"""
-  disabled: Boolean
-}
-
-""""""
-type EnvironmentAggregateResult {
-  """"""
-  count: Int
-
-  """"""
-  idMin: String
-
-  """"""
-  idMax: String
-
-  """"""
-  nameMin: String
-
-  """"""
-  nameMax: String
-
-  """"""
-  descriptionMin: String
-
-  """"""
-  descriptionMax: String
-
-  """"""
-  urlMin: String
-
-  """"""
-  urlMax: String
-}
-
-""""""
-type TeamAggregateResult {
-  """"""
-  count: Int
-
-  """"""
-  idMin: String
-
-  """"""
-  idMax: String
-
-  """"""
-  nameMin: String
-
-  """"""
-  nameMax: String
-
-  """"""
-  descriptionMin: String
-
-  """"""
-  descriptionMax: String
-
-  """"""
-  createdMin: DateTime
-
-  """"""
-  createdMax: DateTime
-
-  """"""
-  modifiedMin: DateTime
-
-  """"""
-  modifiedMax: DateTime
-}
-
-""""""
-type VulnerabilityVersionChangesAggregateResult {
-  """"""
-  count: Int
-
-  """"""
-  atMin: String
-
-  """"""
-  atMax: String
-}
-
-""""""
-enum UserHasFilter {
-  """"""
-  id
-
-  """"""
-  email
-
-  """"""
-  fullName
-
-  """"""
-  created
-
-  """"""
-  modified
-
-  """"""
-  teams
-
-  """"""
-  roles
-
-  """"""
-  disabled
-}
-
-""""""
-enum VulnerabilityDetailOrderable {
-  """"""
-  title
-
-  """"""
-  summary
-
-  """"""
-  datePublic
-
-  """"""
-  collectionURL
-
-  """"""
-  defaultStatus
-
-  """"""
-  source
-}
-
-""""""
-input AddVulnerabilityRatingInput {
-  """"""
-  severity: Severity!
-
-  """"""
-  score: Float!
-
-  """"""
-  method: String
-}
-
-""""""
-type ApplicationVersion {
-  """"""
-  branch: String
-
-  """"""
-  release: String
-
-  """"""
-  tag: String
-}
-
-""""""
-type ApplicationVersionAggregateResult {
-  """"""
-  count: Int
-
-  """"""
-  branchMin: String
-
-  """"""
-  branchMax: String
-
-  """"""
-  releaseMin: String
-
-  """"""
-  releaseMax: String
-
-  """"""
-  tagMin: String
-
-  """"""
-  tagMax: String
-}
-
-""""""
-input ComponentFilter {
-  """"""
-  group: StringRegExpFilter_StringTermFilter
-
-  """"""
-  name: StringRegExpFilter_StringTermFilter
-
-  """"""
-  description: StringFullTextFilter_StringTermFilter
-
-  """"""
-  scope: StringExactFilter
-
-  """"""
-  version: StringRegExpFilter_StringTermFilter
-
-  """"""
-  purl: StringHashFilter_StringRegExpFilter_StringTermFilter
-
-  """"""
-  has: [ComponentHasFilter]
-
-  """"""
-  and: [ComponentFilter]
-
-  """"""
-  or: [ComponentFilter]
-
-  """"""
-  not: ComponentFilter
-}
-
-""""""
-input AddBomMetadataInput {
-  """"""
-  timestamp: DateTime!
-
-  """"""
-  component: ComponentRef
-}
-
-""""""
-input AddVulnerabilityAnalysisInput {
-  """"""
-  state: String
-
-  """"""
-  detail: String
-}
-
-""""""
-input ApplicationVersionOrder {
-  """"""
-  asc: ApplicationVersionOrderable
-
-  """"""
-  desc: ApplicationVersionOrderable
-
-  """"""
-  then: ApplicationVersionOrder
-}
-
-""""""
-input BomMetadataOrder {
-  """"""
-  asc: BomMetadataOrderable
-
-  """"""
-  desc: BomMetadataOrderable
-
-  """"""
-  then: BomMetadataOrder
-}
-
-""""""
-input PropertiesOrder {
-  """"""
-  asc: PropertiesOrderable
-
-  """"""
-  desc: PropertiesOrderable
-
-  """"""
-  then: PropertiesOrder
-}
-
-""""""
-input UpdateEnvironmentInput {
-  """"""
-  filter: EnvironmentFilter!
-
-  """"""
-  set: EnvironmentPatch
-
-  """"""
-  remove: EnvironmentPatch
-}
-
-""""""
-enum BomServiceOrderable {
-  """"""
-  bomRef
-
-  """"""
-  group
-
-  """"""
-  name
-
-  """"""
-  version
-
-  """"""
-  description
-}
-
-""""""
-enum VulnerabilityAdvisoryHasFilter {
-  """"""
-  title
-
-  """"""
-  url
-}
-
-""""""
-enum ComponentHasFilter {
-  """"""
-  isRoot
-
-  """"""
-  bomRef
-
-  """"""
-  group
-
-  """"""
-  name
-
-  """"""
-  description
-
-  """"""
-  ctype
-
-  """"""
-  subPath
-
-  """"""
-  repoUrl
-
-  """"""
-  downloadUrl
-
-  """"""
-  publisher
-
-  """"""
-  licenses
-
-  """"""
-  scope
-
-  """"""
-  version
-
-  """"""
-  purl
-
-  """"""
-  vulnerabilities
-
-  """"""
-  properties
-
-  """"""
-  dependency
-
-  """"""
-  appearsIn
-}
-
-""""""
-enum TeamHasFilter {
-  """"""
-  id
-
-  """"""
-  name
-
-  """"""
-  description
-
-  """"""
-  tags
-
-  """"""
-  users
-
-  """"""
-  applications
-
-  """"""
-  created
-
-  """"""
-  modified
-
-  """"""
-  disabled
-}
-
-""""""
-input ComponentLicenseOrder {
-  """"""
-  asc: ComponentLicenseOrderable
-
-  """"""
-  desc: ComponentLicenseOrderable
-
-  """"""
-  then: ComponentLicenseOrder
-}
-
-""""""
-input VulnerabilityVersionChangesFilter {
-  """"""
-  has: [VulnerabilityVersionChangesHasFilter]
-
-  """"""
-  and: [VulnerabilityVersionChangesFilter]
-
-  """"""
-  or: [VulnerabilityVersionChangesFilter]
-
-  """"""
-  not: VulnerabilityVersionChangesFilter
-}
-
-""""""
-input FloatRange {
-  """"""
-  min: Float!
-
-  """"""
-  max: Float!
-}
-
-""""""
-input CustomHTTP {
-  """"""
-  url: String!
-
-  """"""
-  method: HTTPMethod!
-
-  """"""
-  body: String
-
-  """"""
-  graphql: String
-
-  """"""
-  mode: Mode
-
-  """"""
-  forwardHeaders: [String!]
-
-  """"""
-  secretHeaders: [String!]
-
-  """"""
-  introspectionHeaders: [String!]
-
-  """"""
-  skipIntrospection: Boolean
-}
-
-""""""
-type UpdateUserPayload {
-  """"""
-  user(filter: UserFilter, order: UserOrder, first: Int, offset: Int): [User]
-
-  """"""
-  numUids: Int
-}
-
-""""""
-input AddVulnerabilityAdvisoryInput {
-  """"""
-  title: String
-
-  """"""
-  url: String
-}
-
-""""""
-input ApplicationFilter {
-  """"""
-  id: StringHashFilter
-
-  """"""
-  name: StringRegExpFilter_StringTermFilter
-
-  """"""
-  description: StringFullTextFilter_StringTermFilter
-
-  """"""
-  has: [ApplicationHasFilter]
-
-  """"""
-  and: [ApplicationFilter]
-
-  """"""
-  or: [ApplicationFilter]
-
-  """"""
-  not: ApplicationFilter
-}
-
-""""""
-input StringRegExpFilter_StringTermFilter {
-  """"""
-  regexp: String
-
-  """"""
-  allofterms: String
-
-  """"""
-  anyofterms: String
-}
-
-""""""
-input WithinFilter {
-  """"""
-  polygon: PolygonRef!
-}
-
-""""""
-type AddBomPayload {
-  """"""
-  bom(filter: BomFilter, order: BomOrder, first: Int, offset: Int): [Bom]
-
-  """"""
-  numUids: Int
-}
-
-""""""
-type DeleteVulnerabilityRatingPayload {
-  """"""
-  vulnerabilityRating(filter: VulnerabilityRatingFilter, order: VulnerabilityRatingOrder, first: Int, offset: Int): [VulnerabilityRating]
-
-  """"""
-  msg: String
-
-  """"""
-  numUids: Int
-}
-
-""""""
-enum ApplicationVersionOrderable {
-  """"""
-  branch
-
-  """"""
-  release
-
-  """"""
-  tag
-}
-
-""""""
-type Vulnerability {
-  """"""
-  bomRef: String!
-
-  """"""
-  id: String!
-
-  """"""
-  source(filter: VulnerabilitySourceFilter): VulnerabilitySource
-
-  """"""
-  ratings(filter: VulnerabilityRatingFilter, order: VulnerabilityRatingOrder, first: Int, offset: Int): [VulnerabilityRating]
-
-  """"""
-  severity: Severity!
-
-  """"""
-  cvss_score: Float!
-
-  """"""
-  cwes: [Int]
-
-  """"""
-  description: String
-
-  """"""
-  recommendation: String
-
-  """"""
-  advisories(filter: VulnerabilityAdvisoryFilter, order: VulnerabilityAdvisoryOrder, first: Int, offset: Int): [VulnerabilityAdvisory]
-
-  """"""
-  analysis(filter: VulnerabilityAnalysisFilter): VulnerabilityAnalysis
-
-  """"""
-  affects(filter: ComponentFilter, order: ComponentOrder, first: Int, offset: Int): [Component]
-
-  """"""
-  version: String!
-
-  """"""
-  fix_version: String
-
-  """"""
-  properties(filter: PropertiesFilter, order: PropertiesOrder, first: Int, offset: Int): [Properties]
-
-  """"""
-  detail(filter: VulnerabilityDetailFilter): VulnerabilityDetail
-
-  """"""
-  ratingsAggregate(filter: VulnerabilityRatingFilter): VulnerabilityRatingAggregateResult
-
-  """"""
-  advisoriesAggregate(filter: VulnerabilityAdvisoryFilter): VulnerabilityAdvisoryAggregateResult
-
-  """"""
-  affectsAggregate(filter: ComponentFilter): ComponentAggregateResult
-
-  """"""
-  propertiesAggregate(filter: PropertiesFilter): PropertiesAggregateResult
-}
-
-""""""
-input PointGeoFilter {
-  """"""
-  near: NearFilter
-
-  """"""
-  within: WithinFilter
-}
-
-""""""
-input UserFilter {
-  """"""
-  id: StringHashFilter
-
-  """"""
-  email: StringTermFilter
-
-  """"""
-  fullName: StringFullTextFilter_StringTermFilter
-
-  """"""
-  has: [UserHasFilter]
-
-  """"""
-  and: [UserFilter]
-
-  """"""
-  or: [UserFilter]
-
-  """"""
-  not: UserFilter
-}
-
-""""""
-input IntRange {
-  """"""
-  min: Int!
-
-  """"""
-  max: Int!
-}
-
-""""""
-enum BomServiceHasFilter {
-  """"""
-  bomRef
-
-  """"""
-  group
-
-  """"""
-  name
-
-  """"""
-  version
-
-  """"""
-  description
-
-  """"""
-  endpoints
-
-  """"""
-  authenticated
-
-  """"""
-  xTrustBoundary
-
-  """"""
-  data
-
-  """"""
-  licenses
-
-  """"""
-  services
-
-  """"""
-  properties
-}
-
-""""""
-type VulnerabilityAdvisory {
-  """"""
-  title: String
-
-  """"""
-  url: String
-}
-
-""""""
-enum BomOrderable {
-  """"""
-  serialNumber
-}
-
-""""""
-enum EnvironmentHasFilter {
-  """"""
-  id
-
-  """"""
-  name
-
-  """"""
-  description
-
-  """"""
-  tags
-
-  """"""
-  url
-
-  """"""
-  users
-
-  """"""
-  teams
-}
-
-""""""
-input BomServiceDataPatch {
-  """"""
-  data: String
-
-  """"""
-  flow: [String]
-
-  """"""
-  classification: [String]
-}
-
-""""""
-input UpdateTeamInput {
-  """"""
-  filter: TeamFilter!
-
-  """"""
-  set: TeamPatch
-
-  """"""
-  remove: TeamPatch
-}
-
-""""""
-enum PropertiesHasFilter {
-  """"""
-  name
-
-  """"""
-  value
-}
-
-""""""
-input AddComponentInput {
-  """"""
-  isRoot: Boolean
-
-  """"""
-  bomRef: String!
-
-  """"""
-  group: String!
-
-  """"""
-  name: String!
-
-  """"""
-  description: String
-
-  """"""
-  ctype: String
-
-  """"""
-  subPath: String
-
-  """"""
-  repoUrl: String
-
-  """"""
-  downloadUrl: String
-
-  """"""
-  publisher: String
-
-  """"""
-  licenses: [ComponentLicenseRef]
-
-  """"""
-  scope: String
-
-  """"""
-  version: String!
-
-  """"""
-  purl: String!
-
-  """"""
-  vulnerabilities: [VulnerabilityRef]
-
-  """"""
-  properties: [PropertiesRef]
-
-  """"""
-  dependency: [ComponentRef]
-
-  """"""
-  appearsIn: [BomRef]
-}
-
-""""""
-input TeamRef {
-  """"""
-  id: String
-
-  """"""
-  name: String
-
-  """"""
-  description: String
-
-  """"""
-  tags: [String]
-
-  """"""
-  users: [UserRef]
-
-  """"""
-  applications: [ApplicationRef]
-
-  """"""
-  created: DateTime
-
-  """"""
-  modified: DateTime
-
-  """"""
-  disabled: Boolean
-}
-
-""""""
-input VulnerabilityOrder {
-  """"""
-  asc: VulnerabilityOrderable
-
-  """"""
-  desc: VulnerabilityOrderable
-
-  """"""
-  then: VulnerabilityOrder
-}
-
-""""""
-type VulnerabilityVersionChanges {
-  """"""
-  at: String!
-
-  """"""
-  status: VulnerabilityVersionStatusEnum!
-}
-
-""""""
-enum ComponentOrderable {
-  """"""
-  bomRef
-
-  """"""
-  group
-
-  """"""
-  name
-
-  """"""
-  description
-
-  """"""
-  ctype
-
-  """"""
-  subPath
-
-  """"""
-  repoUrl
-
-  """"""
-  downloadUrl
-
-  """"""
-  publisher
-
-  """"""
-  scope
-
-  """"""
-  version
-
-  """"""
-  purl
-}
-
-""""""
-enum BomHasFilter {
-  """"""
-  serialNumber
-
-  """"""
-  metadata
-
-  """"""
-  components
-
-  """"""
-  services
-
-  """"""
-  application
-
-  """"""
-  scan
-
-  """"""
-  vulnerabilities
-}
-
-""""""
-enum UserOrderable {
-  """"""
-  id
-
-  """"""
-  email
-
-  """"""
-  fullName
-
-  """"""
-  created
-
-  """"""
-  modified
-}
-
-""""""
-input AddVulnerabilityInput {
-  """"""
-  bomRef: String!
-
-  """"""
-  id: String!
-
-  """"""
-  source: VulnerabilitySourceRef
-
-  """"""
-  ratings: [VulnerabilityRatingRef]
-
-  """"""
-  severity: Severity!
-
-  """"""
-  cvss_score: Float!
-
-  """"""
-  cwes: [Int]
-
-  """"""
-  description: String
-
-  """"""
-  recommendation: String
-
-  """"""
-  advisories: [VulnerabilityAdvisoryRef]
-
-  """"""
-  analysis: VulnerabilityAnalysisRef
-
-  """"""
-  affects: [ComponentRef]
-
-  """"""
-  version: String!
-
-  """"""
-  fix_version: String
-
-  """"""
-  properties: [PropertiesRef]
-
-  """"""
-  detail: VulnerabilityDetailRef
-}
-
-""""""
-input BomMetadataPatch {
-  """"""
-  timestamp: DateTime
-
-  """"""
-  component: ComponentRef
-}
-
-""""""
-input PropertiesPatch {
-  """"""
-  name: String
-
-  """"""
-  value: String
-}
-
-""""""
-input ScanResultFilter {
-  """"""
-  id: StringHashFilter
-
-  """"""
-  has: [ScanResultHasFilter]
-
-  """"""
-  and: [ScanResultFilter]
-
-  """"""
-  or: [ScanResultFilter]
-
-  """"""
-  not: ScanResultFilter
-}
-
-""""""
-type VulnerabilityDetailAggregateResult {
-  """"""
-  count: Int
-
-  """"""
-  titleMin: String
-
-  """"""
-  titleMax: String
-
-  """"""
-  summaryMin: String
-
-  """"""
-  summaryMax: String
-
-  """"""
-  datePublicMin: DateTime
-
-  """"""
-  datePublicMax: DateTime
-
-  """"""
-  collectionURLMin: String
-
-  """"""
-  collectionURLMax: String
-
-  """"""
-  defaultStatusMin: String
-
-  """"""
-  defaultStatusMax: String
-
-  """"""
-  sourceMin: String
-
-  """"""
-  sourceMax: String
-}
-
-""""""
-input UpdateVulnerabilitySourceInput {
-  """"""
-  filter: VulnerabilitySourceFilter!
-
-  """"""
-  set: VulnerabilitySourcePatch
-
-  """"""
-  remove: VulnerabilitySourcePatch
-}
-
-""""""
-input VulnerabilityVersionStatusRef {
-  """"""
-  version: String
-
-  """"""
-  versionType: String
-
-  """"""
-  repo: String
-
-  """"""
-  lessThanOrEqual: String
-
-  """"""
-  lessThan: String
-
-  """"""
-  changes: [VulnerabilityVersionChangesRef]
-
-  """"""
-  status: VulnerabilityVersionStatusEnum
-}
-
-""""""
-input ScanResultRef {
-  """"""
-  id: String
-
-  """"""
-  scan: ScanRef
-
-  """"""
-  created: DateTime
-
-  """"""
-  validUntil: DateTime
-
-  """"""
-  bom: [BomRef]
-
-  """"""
-  components: [ComponentRef]
-
-  """"""
-  vulnerabilities: [VulnerabilityRef]
-
-  """"""
-  prioritizedComponents: [ComponentRef]
-
-  """"""
-  prioritizedVulnerabilities: [VulnerabilityRef]
-
-  """"""
-  exploitableComponents: [ComponentRef]
-
-  """"""
-  exploitableVulnerabilities: [VulnerabilityRef]
-
-  """"""
-  ignoredComponents: [ComponentRef]
-
-  """"""
-  ignoredVulnerabilities: [VulnerabilityRef]
-
-  """"""
-  url: String
-
-  """"""
-  htmlUrl: String
-
-  """"""
-  csvUrl: String
-
-  """"""
-  pdfUrl: String
-}
-
-""""""
-input VulnerabilityAdvisoryFilter {
-  """"""
-  title: StringTermFilter
-
-  """"""
-  has: [VulnerabilityAdvisoryHasFilter]
-
-  """"""
-  and: [VulnerabilityAdvisoryFilter]
-
-  """"""
-  or: [VulnerabilityAdvisoryFilter]
-
-  """"""
-  not: VulnerabilityAdvisoryFilter
-}
-
-""""""
-input MultiPolygonRef {
-  """"""
-  polygons: [PolygonRef!]!
-}
-
-""""""
-input BomServiceFilter {
-  """"""
-  group: StringRegExpFilter_StringTermFilter
-
-  """"""
-  name: StringRegExpFilter_StringTermFilter
-
-  """"""
-  version: StringRegExpFilter_StringTermFilter
-
-  """"""
-  description: StringFullTextFilter_StringTermFilter
-
-  """"""
-  endpoints: StringTermFilter
-
-  """"""
-  has: [BomServiceHasFilter]
-
-  """"""
-  and: [BomServiceFilter]
-
-  """"""
-  or: [BomServiceFilter]
-
-  """"""
-  not: BomServiceFilter
-}
-
-""""""
-type AddApplicationPayload {
-  """"""
-  application(filter: ApplicationFilter, order: ApplicationOrder, first: Int, offset: Int): [Application]
-
-  """"""
-  numUids: Int
-}
-
-""""""
-input AddScanResultInput {
-  """"""
-  id: String!
-
-  """"""
-  scan: ScanRef
-
-  """"""
-  created: DateTime
-
-  """"""
-  validUntil: DateTime
-
-  """"""
-  bom: [BomRef]
-
-  """"""
-  components: [ComponentRef]
-
-  """"""
-  vulnerabilities: [VulnerabilityRef]
-
-  """"""
-  prioritizedComponents: [ComponentRef]
-
-  """"""
-  prioritizedVulnerabilities: [VulnerabilityRef]
-
-  """"""
-  exploitableComponents: [ComponentRef]
-
-  """"""
-  exploitableVulnerabilities: [VulnerabilityRef]
-
-  """"""
-  ignoredComponents: [ComponentRef]
-
-  """"""
-  ignoredVulnerabilities: [VulnerabilityRef]
-
-  """"""
-  url: String
-
-  """"""
-  htmlUrl: String
-
-  """"""
-  csvUrl: String
-
-  """"""
-  pdfUrl: String
-}
-
-"""
-The DateTime scalar type represents date and time as a string in RFC3339 format.
-For example: "1985-04-12T23:20:50.52Z" represents 20 mins 50.52 secs after the 23rd hour of Apr 12th 1985 in UTC.
-"""
-scalar DateTime
-
-""""""
-input StringTermFilter {
-  """"""
-  allofterms: String
-
-  """"""
-  anyofterms: String
-}
-
-""""""
-type AddScanResultPayload {
-  """"""
-  scanResult(filter: ScanResultFilter, order: ScanResultOrder, first: Int, offset: Int): [ScanResult]
-
-  """"""
-  numUids: Int
-}
-
-""""""
-type DeleteEnvironmentPayload {
-  """"""
-  environment(filter: EnvironmentFilter, order: EnvironmentOrder, first: Int, offset: Int): [Environment]
-
-  """"""
-  msg: String
-
-  """"""
-  numUids: Int
-}
-
-""""""
-input VulnerabilityDetailOrder {
-  """"""
-  asc: VulnerabilityDetailOrderable
-
-  """"""
-  desc: VulnerabilityDetailOrderable
-
-  """"""
-  then: VulnerabilityDetailOrder
-}
-
-""""""
-input StringHashFilter {
-  """"""
-  eq: String
-
-  """"""
-  in: [String]
-}
-
-""""""
-type AddComponentLicensePayload {
-  """"""
-  componentLicense(filter: ComponentLicenseFilter, order: ComponentLicenseOrder, first: Int, offset: Int): [ComponentLicense]
-
-  """"""
-  numUids: Int
-}
-
-""""""
-type DeleteBomServiceDataPayload {
-  """"""
-  bomServiceData(filter: BomServiceDataFilter, order: BomServiceDataOrder, first: Int, offset: Int): [BomServiceData]
-
-  """"""
-  msg: String
-
-  """"""
-  numUids: Int
-}
-
-""""""
-type DeleteVulnerabilitySourcePayload {
-  """"""
-  vulnerabilitySource(filter: VulnerabilitySourceFilter, order: VulnerabilitySourceOrder, first: Int, offset: Int): [VulnerabilitySource]
-
-  """"""
-  msg: String
-
-  """"""
-  numUids: Int
-}
-
-""""""
-type UpdateApplicationVersionPayload {
-  """"""
-  applicationVersion(filter: ApplicationVersionFilter, order: ApplicationVersionOrder, first: Int, offset: Int): [ApplicationVersion]
-
-  """"""
-  numUids: Int
-}
-
-""""""
-type UpdateComponentPayload {
-  """"""
-  component(filter: ComponentFilter, order: ComponentOrder, first: Int, offset: Int): [Component]
-
-  """"""
-  numUids: Int
-}
-
-""""""
-input ComponentLicenseFilter {
-  """"""
-  id: StringHashFilter
-
-  """"""
-  has: [ComponentLicenseHasFilter]
-
-  """"""
-  and: [ComponentLicenseFilter]
-
-  """"""
-  or: [ComponentLicenseFilter]
-
-  """"""
-  not: ComponentLicenseFilter
-}
-
-""""""
-input GenerateMutationParams {
-  """"""
-  add: Boolean
-
-  """"""
-  update: Boolean
-
-  """"""
-  delete: Boolean
-}
-
-""""""
-type ComponentLicenseAggregateResult {
-  """"""
-  count: Int
-
-  """"""
-  idMin: String
-
-  """"""
-  idMax: String
-
-  """"""
-  nameMin: String
-
-  """"""
-  nameMax: String
-
-  """"""
-  textMin: String
-
-  """"""
-  textMax: String
-
-  """"""
-  urlMin: String
-
-  """"""
-  urlMax: String
-
-  """"""
-  expressionMin: String
-
-  """"""
-  expressionMax: String
-}
-
-""""""
-enum EnvironmentOrderable {
-  """"""
-  id
-
-  """"""
-  name
-
-  """"""
-  description
-
-  """"""
-  url
-}
-
-""""""
-type UpdateApplicationPayload {
-  """"""
-  application(filter: ApplicationFilter, order: ApplicationOrder, first: Int, offset: Int): [Application]
-
-  """"""
-  numUids: Int
-}
-
-""""""
-enum UserRoleOrderable {
-  """"""
-  id
-
-  """"""
-  role
-
-  """"""
-  created
-
-  """"""
-  modified
-}
-
-""""""
-input VulnerabilityVersionStatusOrder {
-  """"""
-  asc: VulnerabilityVersionStatusOrderable
-
-  """"""
-  desc: VulnerabilityVersionStatusOrderable
-
-  """"""
-  then: VulnerabilityVersionStatusOrder
-}
-
-""""""
-input Int64Filter {
-  """"""
-  eq: Int64
-
-  """"""
-  in: [Int64]
-
-  """"""
-  le: Int64
-
-  """"""
-  lt: Int64
-
-  """"""
-  ge: Int64
-
-  """"""
-  gt: Int64
-
-  """"""
-  between: Int64Range
-}
-
-""""""
-type AddBomServiceDataPayload {
-  """"""
-  bomServiceData(filter: BomServiceDataFilter, order: BomServiceDataOrder, first: Int, offset: Int): [BomServiceData]
-
-  """"""
-  numUids: Int
-}
-
-""""""
-type DeleteVulnerabilityVersionChangesPayload {
-  """"""
-  vulnerabilityVersionChanges(filter: VulnerabilityVersionChangesFilter, order: VulnerabilityVersionChangesOrder, first: Int, offset: Int): [VulnerabilityVersionChanges]
-
-  """"""
-  msg: String
-
-  """"""
-  numUids: Int
-}
-
-""""""
-input UpdateScanResultInput {
-  """"""
-  filter: ScanResultFilter!
-
-  """"""
-  set: ScanResultPatch
-
-  """"""
-  remove: ScanResultPatch
-}
-
-""""""
-input VulnerabilityRatingFilter {
-  """"""
-  severity: Severity_hash
-
-  """"""
-  score: FloatFilter
-
-  """"""
-  has: [VulnerabilityRatingHasFilter]
-
-  """"""
-  and: [VulnerabilityRatingFilter]
-
-  """"""
-  or: [VulnerabilityRatingFilter]
-
-  """"""
-  not: VulnerabilityRatingFilter
-}
-
-""""""
-type DeleteVulnerabilityAdvisoryPayload {
-  """"""
-  vulnerabilityAdvisory(filter: VulnerabilityAdvisoryFilter, order: VulnerabilityAdvisoryOrder, first: Int, offset: Int): [VulnerabilityAdvisory]
-
-  """"""
-  msg: String
-
-  """"""
-  numUids: Int
-}
-
-""""""
-type UpdateBomServicePayload {
-  """"""
-  bomService(filter: BomServiceFilter, order: BomServiceOrder, first: Int, offset: Int): [BomService]
-
-  """"""
-  numUids: Int
-}
-
-""""""
-enum VulnerabilityAnalysisOrderable {
-  """"""
-  state
-
-  """"""
-  detail
-}
-
-""""""
-input Int64Range {
-  """"""
-  min: Int64!
-
-  """"""
-  max: Int64!
-}
-
-""""""
-type MultiPolygon {
-  """"""
-  polygons: [Polygon!]!
-}
-
-""""""
-type Bom {
-  """"""
-  serialNumber: String!
-
-  """"""
-  metadata(filter: BomMetadataFilter): BomMetadata
-
-  """"""
-  components(filter: ComponentFilter, order: ComponentOrder, first: Int, offset: Int): [Component!]!
-
-  """"""
-  services(filter: BomServiceFilter, order: BomServiceOrder, first: Int, offset: Int): [BomService]
-
-  """"""
-  application(filter: ApplicationFilter): Application
-
-  """"""
-  scan(filter: ScanFilter): Scan
-
-  """"""
-  vulnerabilities(filter: VulnerabilityFilter, order: VulnerabilityOrder, first: Int, offset: Int): [Vulnerability]
-
-  """"""
-  componentsAggregate(filter: ComponentFilter): ComponentAggregateResult
-
-  """"""
-  servicesAggregate(filter: BomServiceFilter): BomServiceAggregateResult
-
-  """"""
-  vulnerabilitiesAggregate(filter: VulnerabilityFilter): VulnerabilityAggregateResult
-}
-
-""""""
-type DeleteVulnerabilityAnalysisPayload {
-  """"""
-  vulnerabilityAnalysis(filter: VulnerabilityAnalysisFilter, order: VulnerabilityAnalysisOrder, first: Int, offset: Int): [VulnerabilityAnalysis]
-
-  """"""
-  msg: String
-
-  """"""
-  numUids: Int
-}
-
-""""""
-type Environment {
-  """"""
-  id: String!
-
-  """"""
-  name: String!
-
-  """"""
-  description: String
-
-  """"""
-  tags: [String]
-
-  """"""
-  url: String
-
-  """"""
-  users(filter: UserFilter, order: UserOrder, first: Int, offset: Int): [User]
-
-  """"""
-  teams(filter: TeamFilter, order: TeamOrder, first: Int, offset: Int): [Team]
-
-  """"""
-  usersAggregate(filter: UserFilter): UserAggregateResult
-
-  """"""
-  teamsAggregate(filter: TeamFilter): TeamAggregateResult
-}
-
-""""""
-input StringRange {
-  """"""
-  min: String!
-
-  """"""
-  max: String!
-}
-
-""""""
-type DeleteBomServicePayload {
-  """"""
-  bomService(filter: BomServiceFilter, order: BomServiceOrder, first: Int, offset: Int): [BomService]
-
-  """"""
-  msg: String
-
-  """"""
-  numUids: Int
-}
-
-""""""
-type DeleteScanPayload {
-  """"""
-  scan(filter: ScanFilter, order: ScanOrder, first: Int, offset: Int): [Scan]
-
-  """"""
-  msg: String
-
-  """"""
-  numUids: Int
-}
-
-""""""
-input AddVulnerabilityVersionStatusInput {
-  """"""
-  version: String!
-
-  """"""
-  versionType: String
-
-  """"""
-  repo: String
-
-  """"""
-  lessThanOrEqual: String
-
-  """"""
-  lessThan: String
-
-  """"""
-  changes: [VulnerabilityVersionChangesRef]
-
-  """"""
-  status: VulnerabilityVersionStatusEnum!
-}
-
-"""
-The Int64 scalar type represents a signed 64‐bit numeric non‐fractional value.
-Int64 can represent values in range [-(2^63),(2^63 - 1)].
-"""
-scalar Int64
-
-""""""
-type DeleteComponentPayload {
-  """"""
-  component(filter: ComponentFilter, order: ComponentOrder, first: Int, offset: Int): [Component]
-
-  """"""
-  msg: String
-
-  """"""
-  numUids: Int
-}
-
-""""""
-type UpdateVulnerabilityVersionChangesPayload {
-  """"""
-  vulnerabilityVersionChanges(filter: VulnerabilityVersionChangesFilter, order: VulnerabilityVersionChangesOrder, first: Int, offset: Int): [VulnerabilityVersionChanges]
-
-  """"""
-  numUids: Int
-}
-
-""""""
-input AddTeamInput {
-  """"""
-  id: String!
-
-  """"""
-  name: String!
-
-  """"""
-  description: String
-
-  """"""
-  tags: [String]
-
-  """"""
-  users: [UserRef]
-
-  """"""
-  applications: [ApplicationRef]
-
-  """"""
-  created: DateTime
-
-  """"""
-  modified: DateTime
-
-  """"""
-  disabled: Boolean
-}
-
-""""""
-input AddVulnerabilitySourceInput {
-  """"""
-  name: String
-
-  """"""
-  url: String
-}
-
-""""""
-type AddPropertiesPayload {
-  """"""
-  properties(filter: PropertiesFilter, order: PropertiesOrder, first: Int, offset: Int): [Properties]
-
-  """"""
-  numUids: Int
-}
-
-""""""
-input IntersectsFilter {
-  """"""
-  polygon: PolygonRef
-
-  """"""
-  multiPolygon: MultiPolygonRef
-}
-
-""""""
-input DateTimeFilter {
-  """"""
-  eq: DateTime
-
-  """"""
-  in: [DateTime]
-
-  """"""
-  le: DateTime
-
-  """"""
-  lt: DateTime
-
-  """"""
-  ge: DateTime
-
-  """"""
-  gt: DateTime
-
-  """"""
-  between: DateTimeRange
-}
-
-""""""
-input BomServicePatch {
-  """"""
-  bomRef: String
-
-  """"""
-  group: String
-
-  """"""
-  name: String
-
-  """"""
-  version: String
-
-  """"""
-  description: String
-
-  """"""
-  endpoints: [String]
-
-  """"""
-  authenticated: Boolean
-
-  """"""
-  xTrustBoundary: Boolean
-
-  """"""
-  data: [BomServiceDataRef]
-
-  """"""
-  licenses: [ComponentLicenseRef]
-
-  """"""
-  services: [BomServiceRef]
-
-  """"""
-  properties: [PropertiesRef]
-}
-
-""""""
-input VulnerabilityFilter {
-  """"""
-  bomRef: StringHashFilter
-
-  """"""
-  id: StringHashFilter_StringTermFilter
-
-  """"""
-  severity: Severity_hash
-
-  """"""
-  cvss_score: FloatFilter
-
-  """"""
-  description: StringFullTextFilter
-
-  """"""
-  recommendation: StringFullTextFilter
-
-  """"""
-  version: StringRegExpFilter_StringTermFilter
-
-  """"""
-  fix_version: StringRegExpFilter_StringTermFilter
-
-  """"""
-  has: [VulnerabilityHasFilter]
-
-  """"""
-  and: [VulnerabilityFilter]
-
-  """"""
-  or: [VulnerabilityFilter]
-
-  """"""
-  not: VulnerabilityFilter
-}
-
-""""""
-type BomMetadata {
-  """"""
-  timestamp: DateTime!
-
-  """"""
-  component(filter: ComponentFilter): Component
-}
-
-""""""
-input PointListRef {
-  """"""
-  points: [PointRef!]!
-}
-
-""""""
-type AddVulnerabilitySourcePayload {
-  """"""
-  vulnerabilitySource(filter: VulnerabilitySourceFilter, order: VulnerabilitySourceOrder, first: Int, offset: Int): [VulnerabilitySource]
-
-  """"""
-  numUids: Int
-}
-
-""""""
-input PropertiesFilter {
-  """"""
-  name: StringFullTextFilter_StringTermFilter
-
-  """"""
-  value: StringFullTextFilter_StringTermFilter
-
-  """"""
-  has: [PropertiesHasFilter]
-
-  """"""
-  and: [PropertiesFilter]
-
-  """"""
-  or: [PropertiesFilter]
-
-  """"""
-  not: PropertiesFilter
-}
-
-""""""
-input VulnerabilityRatingPatch {
-  """"""
-  severity: Severity
-
-  """"""
-  score: Float
-
-  """"""
-  method: String
-}
-
-""""""
-input VulnerabilitySourceOrder {
-  """"""
-  asc: VulnerabilitySourceOrderable
-
-  """"""
-  desc: VulnerabilitySourceOrderable
-
-  """"""
-  then: VulnerabilitySourceOrder
-}
-
-""""""
-input ContainsFilter {
-  """"""
-  point: PointRef
-
-  """"""
-  polygon: PolygonRef
-}
-
-""""""
-type AddBomMetadataPayload {
-  """"""
-  bomMetadata(filter: BomMetadataFilter, order: BomMetadataOrder, first: Int, offset: Int): [BomMetadata]
-
-  """"""
-  numUids: Int
-}
-
-""""""
-type UpdateVulnerabilitySourcePayload {
-  """"""
-  vulnerabilitySource(filter: VulnerabilitySourceFilter, order: VulnerabilitySourceOrder, first: Int, offset: Int): [VulnerabilitySource]
-
-  """"""
-  numUids: Int
-}
-
-""""""
-input AddEnvironmentInput {
-  """"""
-  id: String!
-
-  """"""
-  name: String!
-
-  """"""
-  description: String
-
-  """"""
-  tags: [String]
-
-  """"""
-  url: String
-
-  """"""
-  users: [UserRef]
-
-  """"""
-  teams: [TeamRef]
-}
-
-""""""
 input ScanOrder {
   """"""
   asc: ScanOrderable
@@ -4679,416 +1699,17 @@ input ScanOrder {
 }
 
 """"""
-input VulnerabilityAdvisoryOrder {
-  """"""
-  asc: VulnerabilityAdvisoryOrderable
-
-  """"""
-  desc: VulnerabilityAdvisoryOrderable
-
-  """"""
-  then: VulnerabilityAdvisoryOrder
-}
-
-""""""
-input VulnerabilityAnalysisFilter {
-  """"""
-  state: StringHashFilter_StringTermFilter
-
-  """"""
-  detail: StringFullTextFilter_StringTermFilter
-
-  """"""
-  has: [VulnerabilityAnalysisHasFilter]
-
-  """"""
-  and: [VulnerabilityAnalysisFilter]
-
-  """"""
-  or: [VulnerabilityAnalysisFilter]
-
-  """"""
-  not: VulnerabilityAnalysisFilter
-}
-
-""""""
-input GenerateQueryParams {
-  """"""
-  get: Boolean
-
-  """"""
-  query: Boolean
-
-  """"""
-  password: Boolean
-
-  """"""
-  aggregate: Boolean
-}
-
-""""""
-type DeleteVulnerabilityVersionStatusPayload {
-  """"""
-  vulnerabilityVersionStatus(filter: VulnerabilityVersionStatusFilter, order: VulnerabilityVersionStatusOrder, first: Int, offset: Int): [VulnerabilityVersionStatus]
-
-  """"""
-  msg: String
-
-  """"""
-  numUids: Int
-}
-
-""""""
-type UpdateVulnerabilityPayload {
-  """"""
-  vulnerability(filter: VulnerabilityFilter, order: VulnerabilityOrder, first: Int, offset: Int): [Vulnerability]
-
-  """"""
-  numUids: Int
-}
-
-""""""
-enum ComponentLicenseOrderable {
-  """"""
-  id
-
-  """"""
-  name
-
-  """"""
-  text
-
-  """"""
-  url
-
-  """"""
-  expression
-}
-
-""""""
-type VulnerabilityAnalysis {
-  """"""
-  state: String
-
-  """"""
-  detail: String
-}
-
-""""""
-type AddVulnerabilityAnalysisPayload {
-  """"""
-  vulnerabilityAnalysis(filter: VulnerabilityAnalysisFilter, order: VulnerabilityAnalysisOrder, first: Int, offset: Int): [VulnerabilityAnalysis]
-
-  """"""
-  numUids: Int
-}
-
-""""""
-input UpdatePropertiesInput {
-  """"""
-  filter: PropertiesFilter!
-
-  """"""
-  set: PropertiesPatch
-
-  """"""
-  remove: PropertiesPatch
-}
-
-""""""
-input VulnerabilityAdvisoryPatch {
-  """"""
-  title: String
-
-  """"""
-  url: String
-}
-
-""""""
-type ScanAggregateResult {
-  """"""
-  count: Int
-
-  """"""
-  idMin: String
-
-  """"""
-  idMax: String
-
-  """"""
-  createdMin: DateTime
-
-  """"""
-  createdMax: DateTime
-
-  """"""
-  validUntilMin: DateTime
-
-  """"""
-  validUntilMax: DateTime
-
-  """"""
-  urlMin: String
-
-  """"""
-  urlMax: String
-}
-
-""""""
-enum ApplicationOrderable {
-  """"""
-  id
-
-  """"""
-  name
-
-  """"""
-  description
-
-  """"""
-  repoUrl
-
-  """"""
-  issuesUrl
-
-  """"""
-  ciUrl
-
-  """"""
-  cdUrl
-
-  """"""
-  changeManagementUrl
-
-  """"""
-  created
-
-  """"""
-  modified
-}
-
-""""""
-enum BomServiceDataHasFilter {
-  """"""
-  data
-
-  """"""
-  flow
-
-  """"""
-  classification
-}
-
-""""""
-enum VulnerabilityOrderable {
-  """"""
-  bomRef
-
-  """"""
-  id
-
-  """"""
-  cvss_score
-
-  """"""
-  description
-
-  """"""
-  recommendation
-
-  """"""
-  version
-
-  """"""
-  fix_version
-}
-
-""""""
-input AddVulnerabilityDetailInput {
-  """"""
-  vulnerability: VulnerabilityRef!
-
-  """"""
-  title: String
-
-  """"""
-  summary: String
-
-  """"""
-  datePublic: DateTime
-
-  """"""
-  collectionURL: String
-
-  """"""
-  defaultStatus: String
-
-  """"""
-  descriptions: [String]
-
-  """"""
-  modules: [String]
-
-  """"""
-  programFiles: [String]
-
-  """"""
-  programRoutines: [String]
-
-  """"""
-  platforms: [String]
-
-  """"""
-  versions: [VulnerabilityVersionStatusRef]
-
-  """"""
-  solutions: [String]
-
-  """"""
-  workarounds: [String]
-
-  """"""
-  configurations: [String]
-
-  """"""
-  exploits: [String]
-
-  """"""
-  timeline: [String]
-
-  """"""
-  credits: [String]
-
-  """"""
-  references: [String]
-
-  """"""
-  source: String
-}
-
-""""""
-input UserRef {
-  """"""
+input ScanResultRef {
+  """Unique ID such as UUID or ULID"""
   id: String
 
   """"""
-  email: String
-
-  """"""
-  fullName: String
-
-  """"""
-  created: DateTime
-
-  """"""
-  modified: DateTime
-
-  """"""
-  teams: [TeamRef]
-
-  """"""
-  roles: [UserRoleRef]
-
-  """"""
-  disabled: Boolean
-
-  """"""
-  password: String
-}
-
-""""""
-type AddTeamPayload {
-  """"""
-  team(filter: TeamFilter, order: TeamOrder, first: Int, offset: Int): [Team]
-
-  """"""
-  numUids: Int
-}
-
-""""""
-enum BomMetadataOrderable {
-  """"""
-  timestamp
-}
-
-""""""
-input BomMetadataFilter {
-  """"""
-  has: [BomMetadataHasFilter]
-
-  """"""
-  and: [BomMetadataFilter]
-
-  """"""
-  or: [BomMetadataFilter]
-
-  """"""
-  not: BomMetadataFilter
-}
-
-""""""
-input DateTimeRange {
-  """"""
-  min: DateTime!
-
-  """"""
-  max: DateTime!
-}
-
-""""""
-input FloatFilter {
-  """"""
-  eq: Float
-
-  """"""
-  in: [Float]
-
-  """"""
-  le: Float
-
-  """"""
-  lt: Float
-
-  """"""
-  ge: Float
-
-  """"""
-  gt: Float
-
-  """"""
-  between: FloatRange
-}
-
-""""""
-input UpdateVulnerabilityDetailInput {
-  """"""
-  filter: VulnerabilityDetailFilter!
-
-  """"""
-  set: VulnerabilityDetailPatch
-
-  """"""
-  remove: VulnerabilityDetailPatch
-}
-
-""""""
-input VulnerabilitySourceRef {
-  """"""
-  name: String
-
-  """"""
-  url: String
-}
-
-""""""
-input ScanResultPatch {
-  """"""
   scan: ScanRef
 
-  """"""
+  """Creation date"""
   created: DateTime
 
-  """"""
+  """Optional, validity for result before it is considered stale"""
   validUntil: DateTime
 
   """"""
@@ -5118,659 +1739,29 @@ input ScanResultPatch {
   """"""
   ignoredVulnerabilities: [VulnerabilityRef]
 
-  """"""
+  """Direct url for this scan result"""
   url: String
 
-  """"""
+  """Direct html report url for this scan result"""
   htmlUrl: String
 
-  """"""
+  """Direct csv report url for this scan result"""
   csvUrl: String
 
-  """"""
+  """Direct pdf report url for this scan result"""
   pdfUrl: String
 }
 
 """"""
-input UpdateApplicationVersionInput {
+input UpdateBomMetadataInput {
   """"""
-  filter: ApplicationVersionFilter!
+  filter: BomMetadataFilter!
 
   """"""
-  set: ApplicationVersionPatch
+  set: BomMetadataPatch
 
   """"""
-  remove: ApplicationVersionPatch
-}
-
-""""""
-type DeleteUserPayload {
-  """"""
-  user(filter: UserFilter, order: UserOrder, first: Int, offset: Int): [User]
-
-  """"""
-  msg: String
-
-  """"""
-  numUids: Int
-}
-
-""""""
-type UserAggregateResult {
-  """"""
-  count: Int
-
-  """"""
-  idMin: String
-
-  """"""
-  idMax: String
-
-  """"""
-  emailMin: String
-
-  """"""
-  emailMax: String
-
-  """"""
-  fullNameMin: String
-
-  """"""
-  fullNameMax: String
-
-  """"""
-  createdMin: DateTime
-
-  """"""
-  createdMax: DateTime
-
-  """"""
-  modifiedMin: DateTime
-
-  """"""
-  modifiedMax: DateTime
-}
-
-""""""
-enum ScanOrderable {
-  """"""
-  id
-
-  """"""
-  created
-
-  """"""
-  validUntil
-
-  """"""
-  url
-}
-
-""""""
-enum VulnerabilityAnalysisHasFilter {
-  """"""
-  state
-
-  """"""
-  detail
-}
-
-""""""
-input UpdateVulnerabilityVersionChangesInput {
-  """"""
-  filter: VulnerabilityVersionChangesFilter!
-
-  """"""
-  set: VulnerabilityVersionChangesPatch
-
-  """"""
-  remove: VulnerabilityVersionChangesPatch
-}
-
-""""""
-input StringExactFilter {
-  """"""
-  eq: String
-
-  """"""
-  in: [String]
-
-  """"""
-  le: String
-
-  """"""
-  lt: String
-
-  """"""
-  ge: String
-
-  """"""
-  gt: String
-
-  """"""
-  between: StringRange
-}
-
-""""""
-type DeleteUserRolePayload {
-  """"""
-  userRole(filter: UserRoleFilter, order: UserRoleOrder, first: Int, offset: Int): [UserRole]
-
-  """"""
-  msg: String
-
-  """"""
-  numUids: Int
-}
-
-""""""
-type ScanResultAggregateResult {
-  """"""
-  count: Int
-
-  """"""
-  idMin: String
-
-  """"""
-  idMax: String
-
-  """"""
-  createdMin: DateTime
-
-  """"""
-  createdMax: DateTime
-
-  """"""
-  validUntilMin: DateTime
-
-  """"""
-  validUntilMax: DateTime
-
-  """"""
-  urlMin: String
-
-  """"""
-  urlMax: String
-
-  """"""
-  htmlUrlMin: String
-
-  """"""
-  htmlUrlMax: String
-
-  """"""
-  csvUrlMin: String
-
-  """"""
-  csvUrlMax: String
-
-  """"""
-  pdfUrlMin: String
-
-  """"""
-  pdfUrlMax: String
-}
-
-""""""
-enum VulnerabilityVersionChangesHasFilter {
-  """"""
-  at
-
-  """"""
-  status
-}
-
-""""""
-input ApplicationVersionPatch {
-  """"""
-  branch: String
-
-  """"""
-  release: String
-
-  """"""
-  tag: String
-}
-
-""""""
-input ComponentOrder {
-  """"""
-  asc: ComponentOrderable
-
-  """"""
-  desc: ComponentOrderable
-
-  """"""
-  then: ComponentOrder
-}
-
-""""""
-type DeleteBomPayload {
-  """"""
-  bom(filter: BomFilter, order: BomOrder, first: Int, offset: Int): [Bom]
-
-  """"""
-  msg: String
-
-  """"""
-  numUids: Int
-}
-
-""""""
-type PropertiesAggregateResult {
-  """"""
-  count: Int
-
-  """"""
-  nameMin: String
-
-  """"""
-  nameMax: String
-
-  """"""
-  valueMin: String
-
-  """"""
-  valueMax: String
-}
-
-""""""
-input AddBomInput {
-  """"""
-  serialNumber: String!
-
-  """"""
-  metadata: BomMetadataRef
-
-  """"""
-  components: [ComponentRef!]!
-
-  """"""
-  services: [BomServiceRef]
-
-  """"""
-  application: ApplicationRef
-
-  """"""
-  scan: ScanRef
-
-  """"""
-  vulnerabilities: [VulnerabilityRef]
-}
-
-""""""
-input BomPatch {
-  """"""
-  metadata: BomMetadataRef
-
-  """"""
-  components: [ComponentRef!]
-
-  """"""
-  services: [BomServiceRef]
-
-  """"""
-  application: ApplicationRef
-
-  """"""
-  scan: ScanRef
-
-  """"""
-  vulnerabilities: [VulnerabilityRef]
-}
-
-""""""
-enum VulnerabilityVersionStatusEnum {
-  """"""
-  affected
-
-  """"""
-  unaffected
-}
-
-""""""
-type VulnerabilityDetail {
-  """"""
-  vulnerability(filter: VulnerabilityFilter): Vulnerability!
-
-  """"""
-  title: String
-
-  """"""
-  summary: String
-
-  """"""
-  datePublic: DateTime
-
-  """"""
-  collectionURL: String
-
-  """"""
-  defaultStatus: String
-
-  """"""
-  descriptions: [String]
-
-  """"""
-  modules: [String]
-
-  """"""
-  programFiles: [String]
-
-  """"""
-  programRoutines: [String]
-
-  """"""
-  platforms: [String]
-
-  """"""
-  versions(filter: VulnerabilityVersionStatusFilter, order: VulnerabilityVersionStatusOrder, first: Int, offset: Int): [VulnerabilityVersionStatus]
-
-  """"""
-  solutions: [String]
-
-  """"""
-  workarounds: [String]
-
-  """"""
-  configurations: [String]
-
-  """"""
-  exploits: [String]
-
-  """"""
-  timeline: [String]
-
-  """"""
-  credits: [String]
-
-  """"""
-  references: [String]
-
-  """"""
-  source: String
-
-  """"""
-  versionsAggregate(filter: VulnerabilityVersionStatusFilter): VulnerabilityVersionStatusAggregateResult
-}
-
-""""""
-input UpdateComponentInput {
-  """"""
-  filter: ComponentFilter!
-
-  """"""
-  set: ComponentPatch
-
-  """"""
-  remove: ComponentPatch
-}
-
-""""""
-input VulnerabilityVersionStatusFilter {
-  """"""
-  has: [VulnerabilityVersionStatusHasFilter]
-
-  """"""
-  and: [VulnerabilityVersionStatusFilter]
-
-  """"""
-  or: [VulnerabilityVersionStatusFilter]
-
-  """"""
-  not: VulnerabilityVersionStatusFilter
-}
-
-""""""
-type AddComponentPayload {
-  """"""
-  component(filter: ComponentFilter, order: ComponentOrder, first: Int, offset: Int): [Component]
-
-  """"""
-  numUids: Int
-}
-
-""""""
-input AddComponentLicenseInput {
-  """"""
-  id: String
-
-  """"""
-  name: String
-
-  """"""
-  text: String
-
-  """"""
-  url: String
-
-  """"""
-  expression: String
-}
-
-""""""
-input UpdateBomInput {
-  """"""
-  filter: BomFilter!
-
-  """"""
-  set: BomPatch
-
-  """"""
-  remove: BomPatch
-}
-
-""""""
-type BomServiceData {
-  """"""
-  data: String
-
-  """"""
-  flow: [String]
-
-  """"""
-  classification: [String]
-}
-
-""""""
-type ComponentAggregateResult {
-  """"""
-  count: Int
-
-  """"""
-  bomRefMin: String
-
-  """"""
-  bomRefMax: String
-
-  """"""
-  groupMin: String
-
-  """"""
-  groupMax: String
-
-  """"""
-  nameMin: String
-
-  """"""
-  nameMax: String
-
-  """"""
-  descriptionMin: String
-
-  """"""
-  descriptionMax: String
-
-  """"""
-  ctypeMin: String
-
-  """"""
-  ctypeMax: String
-
-  """"""
-  subPathMin: String
-
-  """"""
-  subPathMax: String
-
-  """"""
-  repoUrlMin: String
-
-  """"""
-  repoUrlMax: String
-
-  """"""
-  downloadUrlMin: String
-
-  """"""
-  downloadUrlMax: String
-
-  """"""
-  publisherMin: String
-
-  """"""
-  publisherMax: String
-
-  """"""
-  scopeMin: String
-
-  """"""
-  scopeMax: String
-
-  """"""
-  versionMin: String
-
-  """"""
-  versionMax: String
-
-  """"""
-  purlMin: String
-
-  """"""
-  purlMax: String
-}
-
-""""""
-enum VulnerabilitySourceHasFilter {
-  """"""
-  name
-
-  """"""
-  url
-}
-
-""""""
-input VulnerabilitySourceFilter {
-  """"""
-  name: StringTermFilter
-
-  """"""
-  has: [VulnerabilitySourceHasFilter]
-
-  """"""
-  and: [VulnerabilitySourceFilter]
-
-  """"""
-  or: [VulnerabilitySourceFilter]
-
-  """"""
-  not: VulnerabilitySourceFilter
-}
-
-""""""
-input PropertiesRef {
-  """"""
-  name: String
-
-  """"""
-  value: String
-}
-
-""""""
-enum HTTPMethod {
-  """"""
-  GET
-
-  """"""
-  POST
-
-  """"""
-  PUT
-
-  """"""
-  PATCH
-
-  """"""
-  DELETE
-}
-
-""""""
-input PolygonRef {
-  """"""
-  coordinates: [PointListRef!]!
-}
-
-""""""
-type AddUserRolePayload {
-  """"""
-  userRole(filter: UserRoleFilter, order: UserRoleOrder, first: Int, offset: Int): [UserRole]
-
-  """"""
-  numUids: Int
-}
-
-""""""
-input BomFilter {
-  """"""
-  serialNumber: StringHashFilter
-
-  """"""
-  has: [BomHasFilter]
-
-  """"""
-  and: [BomFilter]
-
-  """"""
-  or: [BomFilter]
-
-  """"""
-  not: BomFilter
-}
-
-""""""
-input ScanResultOrder {
-  """"""
-  asc: ScanResultOrderable
-
-  """"""
-  desc: ScanResultOrderable
-
-  """"""
-  then: ScanResultOrder
-}
-
-""""""
-input UpdateVulnerabilityAdvisoryInput {
-  """"""
-  filter: VulnerabilityAdvisoryFilter!
-
-  """"""
-  set: VulnerabilityAdvisoryPatch
-
-  """"""
-  remove: VulnerabilityAdvisoryPatch
-}
-
-""""""
-type VulnerabilityRating {
-  """"""
-  severity: Severity!
-
-  """"""
-  score: Float!
-
-  """"""
-  method: String
+  remove: BomMetadataPatch
 }
 
 """"""
@@ -5984,62 +1975,1877 @@ type Mutation {
 }
 
 """"""
-input ApplicationVersionFilter {
+input Int64Filter {
   """"""
-  has: [ApplicationVersionHasFilter]
+  eq: Int64
 
   """"""
-  and: [ApplicationVersionFilter]
+  in: [Int64]
 
   """"""
-  or: [ApplicationVersionFilter]
+  le: Int64
 
   """"""
-  not: ApplicationVersionFilter
+  lt: Int64
+
+  """"""
+  ge: Int64
+
+  """"""
+  gt: Int64
+
+  """"""
+  between: Int64Range
 }
 
 """"""
-input ComponentRef {
+type AddUserRolePayload {
   """"""
-  isRoot: Boolean
+  userRole(filter: UserRoleFilter, order: UserRoleOrder, first: Int, offset: Int): [UserRole]
 
   """"""
-  bomRef: String
+  numUids: Int
+}
+
+""""""
+type DeleteApplicationPayload {
+  """"""
+  application(filter: ApplicationFilter, order: ApplicationOrder, first: Int, offset: Int): [Application]
 
   """"""
-  group: String
+  msg: String
 
   """"""
+  numUids: Int
+}
+
+""""""
+type DeleteScanPayload {
+  """"""
+  scan(filter: ScanFilter, order: ScanOrder, first: Int, offset: Int): [Scan]
+
+  """"""
+  msg: String
+
+  """"""
+  numUids: Int
+}
+
+""""""
+input StringHashFilter_StringRegExpFilter_StringTermFilter {
+  """"""
+  eq: String
+
+  """"""
+  in: [String]
+
+  """"""
+  regexp: String
+
+  """"""
+  allofterms: String
+
+  """"""
+  anyofterms: String
+}
+
+""""""
+input UpdateApplicationInput {
+  """"""
+  filter: ApplicationFilter!
+
+  """"""
+  set: ApplicationPatch
+
+  """"""
+  remove: ApplicationPatch
+}
+
+""""""
+type ApplicationVersionAggregateResult {
+  """"""
+  count: Int
+
+  """"""
+  branchMin: String
+
+  """"""
+  branchMax: String
+
+  """"""
+  releaseMin: String
+
+  """"""
+  releaseMax: String
+
+  """"""
+  tagMin: String
+
+  """"""
+  tagMax: String
+
+  """"""
+  commit_shaMin: String
+
+  """"""
+  commit_shaMax: String
+}
+
+""""""
+input BomOrder {
+  """"""
+  asc: BomOrderable
+
+  """"""
+  desc: BomOrderable
+
+  """"""
+  then: BomOrder
+}
+
+""""""
+input EnvironmentRef {
+  """Unique ID such as UUID or ULID"""
+  id: String
+
+  """Name of the environment such as dev, stage, preprod"""
   name: String
 
-  """"""
+  """Description of the environment for search"""
   description: String
 
+  """List of tags"""
+  tags: [String]
+
+  """Direct url to the environment"""
+  url: String
+
   """"""
+  users: [UserRef]
+
+  """"""
+  teams: [TeamRef]
+}
+
+""""""
+input VulnerabilityAnalysisFilter {
+  """"""
+  state: StringHashFilter_StringTermFilter
+
+  """"""
+  detail: StringFullTextFilter_StringTermFilter
+
+  """"""
+  has: [VulnerabilityAnalysisHasFilter]
+
+  """"""
+  and: [VulnerabilityAnalysisFilter]
+
+  """"""
+  or: [VulnerabilityAnalysisFilter]
+
+  """"""
+  not: VulnerabilityAnalysisFilter
+}
+
+""""""
+enum VulnerabilityDetailOrderable {
+  """"""
+  title
+
+  """"""
+  summary
+
+  """"""
+  datePublic
+
+  """"""
+  collectionURL
+
+  """"""
+  defaultStatus
+
+  """"""
+  source
+}
+
+""""""
+input VulnerabilityVersionStatusFilter {
+  """"""
+  has: [VulnerabilityVersionStatusHasFilter]
+
+  """"""
+  and: [VulnerabilityVersionStatusFilter]
+
+  """"""
+  or: [VulnerabilityVersionStatusFilter]
+
+  """"""
+  not: VulnerabilityVersionStatusFilter
+}
+
+"""Component"""
+type Component {
+  """Is this a root component?"""
+  isRoot: Boolean
+
+  """Unique BOM Reference"""
+  bomRef: String!
+
+  """Group"""
+  group: String!
+
+  """Name of the component"""
+  name: String!
+
+  """Description"""
+  description: String
+
+  """Component type"""
   ctype: String
 
-  """"""
+  """Sub path"""
   subPath: String
 
-  """"""
+  """Repository URL"""
   repoUrl: String
 
-  """"""
+  """Download URL"""
   downloadUrl: String
 
-  """"""
+  """Publisher"""
   publisher: String
+
+  """List of licenses"""
+  licenses(filter: ComponentLicenseFilter, order: ComponentLicenseOrder, first: Int, offset: Int): [ComponentLicense]
+
+  """Component scope such as required, optional, excluded"""
+  scope: String
+
+  """Version"""
+  version: String!
+
+  """Package URL"""
+  purl: String!
+
+  """List of vulnerabilities"""
+  vulnerabilities(filter: VulnerabilityFilter, order: VulnerabilityOrder, first: Int, offset: Int): [Vulnerability]
+
+  """List of properties"""
+  properties(filter: PropertiesFilter, order: PropertiesOrder, first: Int, offset: Int): [Properties]
+
+  """List of dependency"""
+  dependency(filter: ComponentFilter, order: ComponentOrder, first: Int, offset: Int): [Component]
+
+  """List of BoM this component appears in"""
+  appearsIn(filter: BomFilter, order: BomOrder, first: Int, offset: Int): [Bom]
+
+  """"""
+  licensesAggregate(filter: ComponentLicenseFilter): ComponentLicenseAggregateResult
+
+  """"""
+  vulnerabilitiesAggregate(filter: VulnerabilityFilter): VulnerabilityAggregateResult
+
+  """"""
+  propertiesAggregate(filter: PropertiesFilter): PropertiesAggregateResult
+
+  """"""
+  dependencyAggregate(filter: ComponentFilter): ComponentAggregateResult
+
+  """"""
+  appearsInAggregate(filter: BomFilter): BomAggregateResult
+}
+
+"""BoM service"""
+type BomServiceData {
+  """Data name"""
+  data: String
+
+  """Flow of data - inbound, outbound etc"""
+  flow: [String]
+
+  """Classification of data"""
+  classification: [String]
+}
+
+"""Vulnerability version changes"""
+type VulnerabilityVersionChanges {
+  """"""
+  at: String!
+
+  """"""
+  status: VulnerabilityVersionStatusEnum!
+}
+
+""""""
+type AddVulnerabilityAnalysisPayload {
+  """"""
+  vulnerabilityAnalysis(filter: VulnerabilityAnalysisFilter, order: VulnerabilityAnalysisOrder, first: Int, offset: Int): [VulnerabilityAnalysis]
+
+  """"""
+  numUids: Int
+}
+
+""""""
+input AddComponentLicenseInput {
+  """Unique ID"""
+  id: String
+
+  """License name"""
+  name: String
+
+  """License text"""
+  text: String
+
+  """License URL"""
+  url: String
+
+  """License Expression"""
+  expression: String
+}
+
+""""""
+input UpdateScanInput {
+  """"""
+  filter: ScanFilter!
+
+  """"""
+  set: ScanPatch
+
+  """"""
+  remove: ScanPatch
+}
+
+"""Results from a scan"""
+type ScanResult {
+  """Unique ID such as UUID or ULID"""
+  id: String!
+
+  """Scan that created this result"""
+  scan(filter: ScanFilter): Scan
+
+  """Creation date"""
+  created: DateTime!
+
+  """Optional, validity for result before it is considered stale"""
+  validUntil: DateTime
+
+  """List of SBoM used for the scan"""
+  bom(filter: BomFilter, order: BomOrder, first: Int, offset: Int): [Bom]
+
+  """List of components scanned"""
+  components(filter: ComponentFilter, order: ComponentOrder, first: Int, offset: Int): [Component]
+
+  """List of vulnerabilities identified"""
+  vulnerabilities(filter: VulnerabilityFilter, order: VulnerabilityOrder, first: Int, offset: Int): [Vulnerability]
+
+  """List of prioritized components"""
+  prioritizedComponents(filter: ComponentFilter, order: ComponentOrder, first: Int, offset: Int): [Component]
+
+  """List of prioritized vulnerabilities"""
+  prioritizedVulnerabilities(filter: VulnerabilityFilter, order: VulnerabilityOrder, first: Int, offset: Int): [Vulnerability]
+
+  """List of exploitable components"""
+  exploitableComponents(filter: ComponentFilter, order: ComponentOrder, first: Int, offset: Int): [Component]
+
+  """List of exploitable vulnerabilities"""
+  exploitableVulnerabilities(filter: VulnerabilityFilter, order: VulnerabilityOrder, first: Int, offset: Int): [Vulnerability]
+
+  """List of ignored components"""
+  ignoredComponents(filter: ComponentFilter, order: ComponentOrder, first: Int, offset: Int): [Component]
+
+  """List of ignored vulnerabilities"""
+  ignoredVulnerabilities(filter: VulnerabilityFilter, order: VulnerabilityOrder, first: Int, offset: Int): [Vulnerability]
+
+  """Direct url for this scan result"""
+  url: String
+
+  """Direct html report url for this scan result"""
+  htmlUrl: String
+
+  """Direct csv report url for this scan result"""
+  csvUrl: String
+
+  """Direct pdf report url for this scan result"""
+  pdfUrl: String
+
+  """"""
+  bomAggregate(filter: BomFilter): BomAggregateResult
+
+  """"""
+  componentsAggregate(filter: ComponentFilter): ComponentAggregateResult
+
+  """"""
+  vulnerabilitiesAggregate(filter: VulnerabilityFilter): VulnerabilityAggregateResult
+
+  """"""
+  prioritizedComponentsAggregate(filter: ComponentFilter): ComponentAggregateResult
+
+  """"""
+  prioritizedVulnerabilitiesAggregate(filter: VulnerabilityFilter): VulnerabilityAggregateResult
+
+  """"""
+  exploitableComponentsAggregate(filter: ComponentFilter): ComponentAggregateResult
+
+  """"""
+  exploitableVulnerabilitiesAggregate(filter: VulnerabilityFilter): VulnerabilityAggregateResult
+
+  """"""
+  ignoredComponentsAggregate(filter: ComponentFilter): ComponentAggregateResult
+
+  """"""
+  ignoredVulnerabilitiesAggregate(filter: VulnerabilityFilter): VulnerabilityAggregateResult
+}
+
+""""""
+enum Mode {
+  """"""
+  BATCH
+
+  """"""
+  SINGLE
+}
+
+""""""
+input IntersectsFilter {
+  """"""
+  polygon: PolygonRef
+
+  """"""
+  multiPolygon: MultiPolygonRef
+}
+
+""""""
+enum VulnerabilityAnalysisHasFilter {
+  """"""
+  state
+
+  """"""
+  detail
+}
+
+""""""
+input AddTeamInput {
+  """Unique ID such as UUID or ULID"""
+  id: String!
+
+  """Team name"""
+  name: String!
+
+  """Description of the team"""
+  description: String
+
+  """List of tags"""
+  tags: [String]
+
+  """"""
+  users: [UserRef]
+
+  """"""
+  applications: [ApplicationRef]
+
+  """Creation date"""
+  created: DateTime!
+
+  """Modified date"""
+  modified: DateTime!
+
+  """Is this team disabled?"""
+  disabled: Boolean
+}
+
+""""""
+input BomMetadataOrder {
+  """"""
+  asc: BomMetadataOrderable
+
+  """"""
+  desc: BomMetadataOrderable
+
+  """"""
+  then: BomMetadataOrder
+}
+
+""""""
+input PropertiesOrder {
+  """"""
+  asc: PropertiesOrderable
+
+  """"""
+  desc: PropertiesOrderable
+
+  """"""
+  then: PropertiesOrder
+}
+
+""""""
+input ScanResultFilter {
+  """"""
+  id: StringHashFilter
+
+  """"""
+  created: DateTimeFilter
+
+  """"""
+  has: [ScanResultHasFilter]
+
+  """"""
+  and: [ScanResultFilter]
+
+  """"""
+  or: [ScanResultFilter]
+
+  """"""
+  not: ScanResultFilter
+}
+
+""""""
+input VulnerabilityFilter {
+  """"""
+  bomRef: StringHashFilter
+
+  """"""
+  id: StringHashFilter_StringTermFilter
+
+  """"""
+  severity: Severity_hash
+
+  """"""
+  cvss_score: FloatFilter
+
+  """"""
+  description: StringFullTextFilter
+
+  """"""
+  recommendation: StringFullTextFilter
+
+  """"""
+  version: StringRegExpFilter_StringTermFilter
+
+  """"""
+  fix_version: StringRegExpFilter_StringTermFilter
+
+  """"""
+  has: [VulnerabilityHasFilter]
+
+  """"""
+  and: [VulnerabilityFilter]
+
+  """"""
+  or: [VulnerabilityFilter]
+
+  """"""
+  not: VulnerabilityFilter
+}
+
+""""""
+type AddPropertiesPayload {
+  """"""
+  properties(filter: PropertiesFilter, order: PropertiesOrder, first: Int, offset: Int): [Properties]
+
+  """"""
+  numUids: Int
+}
+
+""""""
+type AddVulnerabilityVersionStatusPayload {
+  """"""
+  vulnerabilityVersionStatus(filter: VulnerabilityVersionStatusFilter, order: VulnerabilityVersionStatusOrder, first: Int, offset: Int): [VulnerabilityVersionStatus]
+
+  """"""
+  numUids: Int
+}
+
+""""""
+type ApplicationAggregateResult {
+  """"""
+  count: Int
+
+  """"""
+  idMin: String
+
+  """"""
+  idMax: String
+
+  """"""
+  nameMin: String
+
+  """"""
+  nameMax: String
+
+  """"""
+  descriptionMin: String
+
+  """"""
+  descriptionMax: String
+
+  """"""
+  repoUrlMin: String
+
+  """"""
+  repoUrlMax: String
+
+  """"""
+  issuesUrlMin: String
+
+  """"""
+  issuesUrlMax: String
+
+  """"""
+  ciUrlMin: String
+
+  """"""
+  ciUrlMax: String
+
+  """"""
+  cdUrlMin: String
+
+  """"""
+  cdUrlMax: String
+
+  """"""
+  changeManagementUrlMin: String
+
+  """"""
+  changeManagementUrlMax: String
+
+  """"""
+  createdMin: DateTime
+
+  """"""
+  createdMax: DateTime
+
+  """"""
+  modifiedMin: DateTime
+
+  """"""
+  modifiedMax: DateTime
+}
+
+""""""
+enum ScanResultOrderable {
+  """"""
+  id
+
+  """"""
+  created
+
+  """"""
+  validUntil
+
+  """"""
+  url
+
+  """"""
+  htmlUrl
+
+  """"""
+  csvUrl
+
+  """"""
+  pdfUrl
+}
+
+""""""
+input VulnerabilityAdvisoryOrder {
+  """"""
+  asc: VulnerabilityAdvisoryOrderable
+
+  """"""
+  desc: VulnerabilityAdvisoryOrderable
+
+  """"""
+  then: VulnerabilityAdvisoryOrder
+}
+
+""""""
+input VulnerabilityVersionChangesFilter {
+  """"""
+  has: [VulnerabilityVersionChangesHasFilter]
+
+  """"""
+  and: [VulnerabilityVersionChangesFilter]
+
+  """"""
+  or: [VulnerabilityVersionChangesFilter]
+
+  """"""
+  not: VulnerabilityVersionChangesFilter
+}
+
+""""""
+input DateTimeRange {
+  """"""
+  min: DateTime!
+
+  """"""
+  max: DateTime!
+}
+
+""""""
+type VulnerabilityAggregateResult {
+  """"""
+  count: Int
+
+  """"""
+  bomRefMin: String
+
+  """"""
+  bomRefMax: String
+
+  """"""
+  idMin: String
+
+  """"""
+  idMax: String
+
+  """"""
+  cvss_scoreMin: Float
+
+  """"""
+  cvss_scoreMax: Float
+
+  """"""
+  cvss_scoreSum: Float
+
+  """"""
+  cvss_scoreAvg: Float
+
+  """"""
+  descriptionMin: String
+
+  """"""
+  descriptionMax: String
+
+  """"""
+  recommendationMin: String
+
+  """"""
+  recommendationMax: String
+
+  """"""
+  versionMin: String
+
+  """"""
+  versionMax: String
+
+  """"""
+  fix_versionMin: String
+
+  """"""
+  fix_versionMax: String
+}
+
+""""""
+enum BomServiceOrderable {
+  """"""
+  bomRef
+
+  """"""
+  group
+
+  """"""
+  name
+
+  """"""
+  version
+
+  """"""
+  description
+}
+
+""""""
+enum UserRoleOrderable {
+  """"""
+  id
+
+  """"""
+  role
+
+  """"""
+  created
+
+  """"""
+  modified
+}
+
+""""""
+input AddVulnerabilityRatingInput {
+  """Severity such as critical, high"""
+  severity: Severity!
+
+  """Score"""
+  score: Float!
+
+  """Method used to determine the score"""
+  method: String
+}
+
+""""""
+input StringHashFilter_StringTermFilter {
+  """"""
+  eq: String
+
+  """"""
+  in: [String]
+
+  """"""
+  allofterms: String
+
+  """"""
+  anyofterms: String
+}
+
+""""""
+input StringRange {
+  """"""
+  min: String!
+
+  """"""
+  max: String!
+}
+
+""""""
+type DeleteBomServiceDataPayload {
+  """"""
+  bomServiceData(filter: BomServiceDataFilter, order: BomServiceDataOrder, first: Int, offset: Int): [BomServiceData]
+
+  """"""
+  msg: String
+
+  """"""
+  numUids: Int
+}
+
+""""""
+type UpdateBomPayload {
+  """"""
+  bom(filter: BomFilter, order: BomOrder, first: Int, offset: Int): [Bom]
+
+  """"""
+  numUids: Int
+}
+
+""""""
+type UpdateScanPayload {
+  """"""
+  scan(filter: ScanFilter, order: ScanOrder, first: Int, offset: Int): [Scan]
+
+  """"""
+  numUids: Int
+}
+
+""""""
+enum VulnerabilityHasFilter {
+  """"""
+  bomRef
+
+  """"""
+  id
+
+  """"""
+  source
+
+  """"""
+  ratings
+
+  """"""
+  severity
+
+  """"""
+  cvss_score
+
+  """"""
+  cwes
+
+  """"""
+  description
+
+  """"""
+  recommendation
+
+  """"""
+  advisories
+
+  """"""
+  analysis
+
+  """"""
+  affects
+
+  """"""
+  version
+
+  """"""
+  fix_version
+
+  """"""
+  properties
+
+  """"""
+  detail
+}
+
+""""""
+enum VulnerabilityVersionChangesOrderable {
+  """"""
+  at
+}
+
+""""""
+input BomFilter {
+  """"""
+  serialNumber: StringHashFilter
+
+  """"""
+  has: [BomHasFilter]
+
+  """"""
+  and: [BomFilter]
+
+  """"""
+  or: [BomFilter]
+
+  """"""
+  not: BomFilter
+}
+
+""""""
+input BomServiceDataRef {
+  """Data name"""
+  data: String
+
+  """Flow of data - inbound, outbound etc"""
+  flow: [String]
+
+  """Classification of data"""
+  classification: [String]
+}
+
+"""BoM Metadata"""
+type BomMetadata {
+  """Creation Timestamp"""
+  timestamp: DateTime!
+
+  """Root component"""
+  component(filter: ComponentFilter): Component
+}
+
+"""
+The DateTime scalar type represents date and time as a string in RFC3339 format.
+For example: "1985-04-12T23:20:50.52Z" represents 20 mins 50.52 secs after the 23rd hour of Apr 12th 1985 in UTC.
+"""
+scalar DateTime
+
+""""""
+type DeletePropertiesPayload {
+  """"""
+  properties(filter: PropertiesFilter, order: PropertiesOrder, first: Int, offset: Int): [Properties]
+
+  """"""
+  msg: String
+
+  """"""
+  numUids: Int
+}
+
+""""""
+type DeleteTeamPayload {
+  """"""
+  team(filter: TeamFilter, order: TeamOrder, first: Int, offset: Int): [Team]
+
+  """"""
+  msg: String
+
+  """"""
+  numUids: Int
+}
+
+""""""
+enum ApplicationVersionHasFilter {
+  """"""
+  branch
+
+  """"""
+  release
+
+  """"""
+  tag
+
+  """"""
+  commit_sha
+}
+
+""""""
+enum ApplicationVersionOrderable {
+  """"""
+  branch
+
+  """"""
+  release
+
+  """"""
+  tag
+
+  """"""
+  commit_sha
+}
+
+""""""
+input AddVulnerabilityDetailInput {
+  """"""
+  vulnerability: VulnerabilityRef!
+
+  """Title"""
+  title: String
+
+  """Summary"""
+  summary: String
+
+  """Date the vulnerability became public"""
+  datePublic: DateTime
+
+  """Collection"""
+  collectionURL: String
+
+  """Default status such as affected"""
+  defaultStatus: String
+
+  """List of descriptions"""
+  descriptions: [String]
+
+  """List of modules affected"""
+  modules: [String]
+
+  """List of program files affected"""
+  programFiles: [String]
+
+  """List of program routines affected"""
+  programRoutines: [String]
+
+  """List of platforms affected"""
+  platforms: [String]
+
+  """"""
+  versions: [VulnerabilityVersionStatusRef]
+
+  """List of solutions to mitigate the vulnerability"""
+  solutions: [String]
+
+  """List of workarounds available"""
+  workarounds: [String]
+
+  """List of configurations to mitigate"""
+  configurations: [String]
+
+  """List of exploits"""
+  exploits: [String]
+
+  """List of timeline"""
+  timeline: [String]
+
+  """List of credits"""
+  credits: [String]
+
+  """List of references"""
+  references: [String]
+
+  """Source of the vulnerability detail such as NVD, GitHub"""
+  source: String
+}
+
+""""""
+input BomServiceOrder {
+  """"""
+  asc: BomServiceOrderable
+
+  """"""
+  desc: BomServiceOrderable
+
+  """"""
+  then: BomServiceOrder
+}
+
+""""""
+type ComponentAggregateResult {
+  """"""
+  count: Int
+
+  """"""
+  bomRefMin: String
+
+  """"""
+  bomRefMax: String
+
+  """"""
+  groupMin: String
+
+  """"""
+  groupMax: String
+
+  """"""
+  nameMin: String
+
+  """"""
+  nameMax: String
+
+  """"""
+  descriptionMin: String
+
+  """"""
+  descriptionMax: String
+
+  """"""
+  ctypeMin: String
+
+  """"""
+  ctypeMax: String
+
+  """"""
+  subPathMin: String
+
+  """"""
+  subPathMax: String
+
+  """"""
+  repoUrlMin: String
+
+  """"""
+  repoUrlMax: String
+
+  """"""
+  downloadUrlMin: String
+
+  """"""
+  downloadUrlMax: String
+
+  """"""
+  publisherMin: String
+
+  """"""
+  publisherMax: String
+
+  """"""
+  scopeMin: String
+
+  """"""
+  scopeMax: String
+
+  """"""
+  versionMin: String
+
+  """"""
+  versionMax: String
+
+  """"""
+  purlMin: String
+
+  """"""
+  purlMax: String
+}
+
+""""""
+enum ComponentLicenseHasFilter {
+  """"""
+  id
+
+  """"""
+  name
+
+  """"""
+  text
+
+  """"""
+  url
+
+  """"""
+  expression
+}
+
+""""""
+input UpdateApplicationVersionInput {
+  """"""
+  filter: ApplicationVersionFilter!
+
+  """"""
+  set: ApplicationVersionPatch
+
+  """"""
+  remove: ApplicationVersionPatch
+}
+
+""""""
+type AddBomMetadataPayload {
+  """"""
+  bomMetadata(filter: BomMetadataFilter, order: BomMetadataOrder, first: Int, offset: Int): [BomMetadata]
+
+  """"""
+  numUids: Int
+}
+
+""""""
+type AddVulnerabilitySourcePayload {
+  """"""
+  vulnerabilitySource(filter: VulnerabilitySourceFilter, order: VulnerabilitySourceOrder, first: Int, offset: Int): [VulnerabilitySource]
+
+  """"""
+  numUids: Int
+}
+
+""""""
+type UpdateTeamPayload {
+  """"""
+  team(filter: TeamFilter, order: TeamOrder, first: Int, offset: Int): [Team]
+
+  """"""
+  numUids: Int
+}
+
+""""""
+input ScanResultPatch {
+  """"""
+  scan: ScanRef
+
+  """Creation date"""
+  created: DateTime
+
+  """Optional, validity for result before it is considered stale"""
+  validUntil: DateTime
+
+  """"""
+  bom: [BomRef]
+
+  """"""
+  components: [ComponentRef]
+
+  """"""
+  vulnerabilities: [VulnerabilityRef]
+
+  """"""
+  prioritizedComponents: [ComponentRef]
+
+  """"""
+  prioritizedVulnerabilities: [VulnerabilityRef]
+
+  """"""
+  exploitableComponents: [ComponentRef]
+
+  """"""
+  exploitableVulnerabilities: [VulnerabilityRef]
+
+  """"""
+  ignoredComponents: [ComponentRef]
+
+  """"""
+  ignoredVulnerabilities: [VulnerabilityRef]
+
+  """Direct url for this scan result"""
+  url: String
+
+  """Direct html report url for this scan result"""
+  htmlUrl: String
+
+  """Direct csv report url for this scan result"""
+  csvUrl: String
+
+  """Direct pdf report url for this scan result"""
+  pdfUrl: String
+}
+
+""""""
+input VulnerabilityAdvisoryPatch {
+  """Title"""
+  title: String
+
+  """URL to the advisory"""
+  url: String
+}
+
+""""""
+input VulnerabilityRatingFilter {
+  """"""
+  severity: Severity_hash
+
+  """"""
+  score: FloatFilter
+
+  """"""
+  has: [VulnerabilityRatingHasFilter]
+
+  """"""
+  and: [VulnerabilityRatingFilter]
+
+  """"""
+  or: [VulnerabilityRatingFilter]
+
+  """"""
+  not: VulnerabilityRatingFilter
+}
+
+""""""
+input StringFullTextFilter {
+  """"""
+  alloftext: String
+
+  """"""
+  anyoftext: String
+}
+
+""""""
+type AddComponentLicensePayload {
+  """"""
+  componentLicense(filter: ComponentLicenseFilter, order: ComponentLicenseOrder, first: Int, offset: Int): [ComponentLicense]
+
+  """"""
+  numUids: Int
+}
+
+""""""
+input AddBomServiceDataInput {
+  """Data name"""
+  data: String
+
+  """Flow of data - inbound, outbound etc"""
+  flow: [String]
+
+  """Classification of data"""
+  classification: [String]
+}
+
+""""""
+input VulnerabilityVersionChangesOrder {
+  """"""
+  asc: VulnerabilityVersionChangesOrderable
+
+  """"""
+  desc: VulnerabilityVersionChangesOrderable
+
+  """"""
+  then: VulnerabilityVersionChangesOrder
+}
+
+""""""
+enum HTTPMethod {
+  """"""
+  GET
+
+  """"""
+  POST
+
+  """"""
+  PUT
+
+  """"""
+  PATCH
+
+  """"""
+  DELETE
+}
+
+""""""
+type BomAggregateResult {
+  """"""
+  count: Int
+
+  """"""
+  serialNumberMin: String
+
+  """"""
+  serialNumberMax: String
+}
+
+""""""
+input AddUserRoleInput {
+  """Unique ID such as UUID or ULID"""
+  id: String!
+
+  """"""
+  user: UserRef!
+
+  """"""
+  team: TeamRef!
+
+  """Role string. Example: administrator, developer, security"""
+  role: String!
+
+  """Creation date"""
+  created: DateTime
+
+  """Modified date"""
+  modified: DateTime
+
+  """Is this role disabled?"""
+  disabled: Boolean
+}
+
+""""""
+enum VulnerabilityOrderable {
+  """"""
+  bomRef
+
+  """"""
+  id
+
+  """"""
+  cvss_score
+
+  """"""
+  description
+
+  """"""
+  recommendation
+
+  """"""
+  version
+
+  """"""
+  fix_version
+}
+
+""""""
+input AddBomServiceInput {
+  """Unique Reference in this BoM"""
+  bomRef: String!
+
+  """Group"""
+  group: String!
+
+  """Service name"""
+  name: String!
+
+  """Service version"""
+  version: String!
+
+  """Description"""
+  description: String
+
+  """List of endpoints"""
+  endpoints: [String]
+
+  """Boolean to indicate if this endpoint is authenticated"""
+  authenticated: Boolean
+
+  """Boolean to indicate if this service is cross boundary"""
+  xTrustBoundary: Boolean
+
+  """"""
+  data: [BomServiceDataRef]
 
   """"""
   licenses: [ComponentLicenseRef]
 
   """"""
-  scope: String
+  services: [BomServiceRef]
 
   """"""
+  properties: [PropertiesRef]
+}
+
+""""""
+input ApplicationVersionPatch {
+  """Branch name"""
+  branch: String
+
+  """Release name"""
+  release: String
+
+  """VCS Tag"""
+  tag: String
+
+  """VCS Commit Hash"""
+  commit_sha: String
+}
+
+""""""
+input ScanFilter {
+  """"""
+  id: StringHashFilter
+
+  """"""
+  created: DateTimeFilter
+
+  """"""
+  has: [ScanHasFilter]
+
+  """"""
+  and: [ScanFilter]
+
+  """"""
+  or: [ScanFilter]
+
+  """"""
+  not: ScanFilter
+}
+
+""""""
+input StringTermFilter {
+  """"""
+  allofterms: String
+
+  """"""
+  anyofterms: String
+}
+
+""""""
+type AddBomServiceDataPayload {
+  """"""
+  bomServiceData(filter: BomServiceDataFilter, order: BomServiceDataOrder, first: Int, offset: Int): [BomServiceData]
+
+  """"""
+  numUids: Int
+}
+
+""""""
+enum ApplicationHasFilter {
+  """"""
+  id
+
+  """"""
+  name
+
+  """"""
+  description
+
+  """"""
+  environment
+
+  """"""
+  version
+
+  """"""
+  repoUrl
+
+  """"""
+  issuesUrl
+
+  """"""
+  ciUrl
+
+  """"""
+  cdUrl
+
+  """"""
+  changeManagementUrl
+
+  """"""
+  languages
+
+  """"""
+  frameworks
+
+  """"""
+  classification
+
+  """"""
+  tags
+
+  """"""
+  created
+
+  """"""
+  modified
+
+  """"""
+  teams
+
+  """"""
+  disabled
+}
+
+""""""
+input ScanPatch {
+  """Boolean to represent if this scan was scheduled"""
+  isScheduled: Boolean
+
+  """"""
+  invokedBy: UserRef
+
+  """Creation date"""
+  created: DateTime
+
+  """Optional validity date for this scan"""
+  validUntil: DateTime
+
+  """"""
+  applications: [ApplicationRef]
+
+  """List of custom tags"""
+  tags: [String]
+
+  """"""
+  result: ScanResultRef
+
+  """Direct link to the scan"""
+  url: String
+}
+
+""""""
+input TeamPatch {
+  """Team name"""
+  name: String
+
+  """Description of the team"""
+  description: String
+
+  """List of tags"""
+  tags: [String]
+
+  """"""
+  users: [UserRef]
+
+  """"""
+  applications: [ApplicationRef]
+
+  """Creation date"""
+  created: DateTime
+
+  """Modified date"""
+  modified: DateTime
+
+  """Is this team disabled?"""
+  disabled: Boolean
+}
+
+""""""
+input UpdateComponentLicenseInput {
+  """"""
+  filter: ComponentLicenseFilter!
+
+  """"""
+  set: ComponentLicensePatch
+
+  """"""
+  remove: ComponentLicensePatch
+}
+
+"""Application Environment"""
+type Environment {
+  """Unique ID such as UUID or ULID"""
+  id: String!
+
+  """Name of the environment such as dev, stage, preprod"""
+  name: String!
+
+  """Description of the environment for search"""
+  description: String
+
+  """List of tags"""
+  tags: [String]
+
+  """Direct url to the environment"""
+  url: String
+
+  """List of users of this environment"""
+  users(filter: UserFilter, order: UserOrder, first: Int, offset: Int): [User]
+
+  """List of teams using this environment"""
+  teams(filter: TeamFilter, order: TeamOrder, first: Int, offset: Int): [Team]
+
+  """"""
+  usersAggregate(filter: UserFilter): UserAggregateResult
+
+  """"""
+  teamsAggregate(filter: TeamFilter): TeamAggregateResult
+}
+
+""""""
+type UpdateEnvironmentPayload {
+  """"""
+  environment(filter: EnvironmentFilter, order: EnvironmentOrder, first: Int, offset: Int): [Environment]
+
+  """"""
+  numUids: Int
+}
+
+""""""
+enum ApplicationOrderable {
+  """"""
+  id
+
+  """"""
+  name
+
+  """"""
+  description
+
+  """"""
+  repoUrl
+
+  """"""
+  issuesUrl
+
+  """"""
+  ciUrl
+
+  """"""
+  cdUrl
+
+  """"""
+  changeManagementUrl
+
+  """"""
+  created
+
+  """"""
+  modified
+}
+
+""""""
+input UpdateBomInput {
+  """"""
+  filter: BomFilter!
+
+  """"""
+  set: BomPatch
+
+  """"""
+  remove: BomPatch
+}
+
+""""""
+type AddUserPayload {
+  """"""
+  user(filter: UserFilter, order: UserOrder, first: Int, offset: Int): [User]
+
+  """"""
+  numUids: Int
+}
+
+""""""
+enum EnvironmentOrderable {
+  """"""
+  id
+
+  """"""
+  name
+
+  """"""
+  description
+
+  """"""
+  url
+}
+
+""""""
+input BomRef {
+  """Serial number"""
+  serialNumber: String
+
+  """"""
+  metadata: BomMetadataRef
+
+  """"""
+  components: [ComponentRef!]
+
+  """"""
+  services: [BomServiceRef]
+
+  """"""
+  application: ApplicationRef
+
+  """"""
+  scan: ScanRef
+
+  """"""
+  vulnerabilities: [VulnerabilityRef]
+}
+
+""""""
+input ComponentPatch {
+  """Is this a root component?"""
+  isRoot: Boolean
+
+  """Unique BOM Reference"""
+  bomRef: String
+
+  """Group"""
+  group: String
+
+  """Name of the component"""
+  name: String
+
+  """Description"""
+  description: String
+
+  """Component type"""
+  ctype: String
+
+  """Sub path"""
+  subPath: String
+
+  """Repository URL"""
+  repoUrl: String
+
+  """Download URL"""
+  downloadUrl: String
+
+  """Publisher"""
+  publisher: String
+
+  """"""
+  licenses: [ComponentLicenseRef]
+
+  """Component scope such as required, optional, excluded"""
+  scope: String
+
+  """Version"""
   version: String
 
   """"""
+  vulnerabilities: [VulnerabilityRef]
+
+  """"""
+  properties: [PropertiesRef]
+
+  """"""
+  dependency: [ComponentRef]
+
+  """"""
+  appearsIn: [BomRef]
+}
+
+""""""
+input ComponentRef {
+  """Is this a root component?"""
+  isRoot: Boolean
+
+  """Unique BOM Reference"""
+  bomRef: String
+
+  """Group"""
+  group: String
+
+  """Name of the component"""
+  name: String
+
+  """Description"""
+  description: String
+
+  """Component type"""
+  ctype: String
+
+  """Sub path"""
+  subPath: String
+
+  """Repository URL"""
+  repoUrl: String
+
+  """Download URL"""
+  downloadUrl: String
+
+  """Publisher"""
+  publisher: String
+
+  """"""
+  licenses: [ComponentLicenseRef]
+
+  """Component scope such as required, optional, excluded"""
+  scope: String
+
+  """Version"""
+  version: String
+
+  """Package URL"""
   purl: String
 
   """"""
@@ -6056,15 +3862,1208 @@ input ComponentRef {
 }
 
 """"""
-input UpdateApplicationInput {
+input FloatFilter {
   """"""
-  filter: ApplicationFilter!
+  eq: Float
 
   """"""
-  set: ApplicationPatch
+  in: [Float]
 
   """"""
-  remove: ApplicationPatch
+  le: Float
+
+  """"""
+  lt: Float
+
+  """"""
+  ge: Float
+
+  """"""
+  gt: Float
+
+  """"""
+  between: FloatRange
+}
+
+""""""
+type DeleteUserRolePayload {
+  """"""
+  userRole(filter: UserRoleFilter, order: UserRoleOrder, first: Int, offset: Int): [UserRole]
+
+  """"""
+  msg: String
+
+  """"""
+  numUids: Int
+}
+
+""""""
+type PropertiesAggregateResult {
+  """"""
+  count: Int
+
+  """"""
+  nameMin: String
+
+  """"""
+  nameMax: String
+
+  """"""
+  valueMin: String
+
+  """"""
+  valueMax: String
+}
+
+""""""
+type VulnerabilitySourceAggregateResult {
+  """"""
+  count: Int
+
+  """"""
+  nameMin: String
+
+  """"""
+  nameMax: String
+
+  """"""
+  urlMin: String
+
+  """"""
+  urlMax: String
+}
+
+""""""
+input AddBomMetadataInput {
+  """Creation Timestamp"""
+  timestamp: DateTime!
+
+  """"""
+  component: ComponentRef
+}
+
+""""""
+input AddEnvironmentInput {
+  """Unique ID such as UUID or ULID"""
+  id: String!
+
+  """Name of the environment such as dev, stage, preprod"""
+  name: String!
+
+  """Description of the environment for search"""
+  description: String
+
+  """List of tags"""
+  tags: [String]
+
+  """Direct url to the environment"""
+  url: String
+
+  """"""
+  users: [UserRef]
+
+  """"""
+  teams: [TeamRef]
+}
+
+""""""
+input VulnerabilityDetailOrder {
+  """"""
+  asc: VulnerabilityDetailOrderable
+
+  """"""
+  desc: VulnerabilityDetailOrderable
+
+  """"""
+  then: VulnerabilityDetailOrder
+}
+
+"""Vulnerability detail"""
+type VulnerabilityDetail {
+  """Link to the vulnerability"""
+  vulnerability(filter: VulnerabilityFilter): Vulnerability!
+
+  """Title"""
+  title: String
+
+  """Summary"""
+  summary: String
+
+  """Date the vulnerability became public"""
+  datePublic: DateTime
+
+  """Collection"""
+  collectionURL: String
+
+  """Default status such as affected"""
+  defaultStatus: String
+
+  """List of descriptions"""
+  descriptions: [String]
+
+  """List of modules affected"""
+  modules: [String]
+
+  """List of program files affected"""
+  programFiles: [String]
+
+  """List of program routines affected"""
+  programRoutines: [String]
+
+  """List of platforms affected"""
+  platforms: [String]
+
+  """Vulnerable versions"""
+  versions(filter: VulnerabilityVersionStatusFilter, order: VulnerabilityVersionStatusOrder, first: Int, offset: Int): [VulnerabilityVersionStatus]
+
+  """List of solutions to mitigate the vulnerability"""
+  solutions: [String]
+
+  """List of workarounds available"""
+  workarounds: [String]
+
+  """List of configurations to mitigate"""
+  configurations: [String]
+
+  """List of exploits"""
+  exploits: [String]
+
+  """List of timeline"""
+  timeline: [String]
+
+  """List of credits"""
+  credits: [String]
+
+  """List of references"""
+  references: [String]
+
+  """Source of the vulnerability detail such as NVD, GitHub"""
+  source: String
+
+  """"""
+  versionsAggregate(filter: VulnerabilityVersionStatusFilter): VulnerabilityVersionStatusAggregateResult
+}
+
+""""""
+input StringRegExpFilter_StringTermFilter {
+  """"""
+  regexp: String
+
+  """"""
+  allofterms: String
+
+  """"""
+  anyofterms: String
+}
+
+"""Represents an application version"""
+type ApplicationVersion {
+  """Branch name"""
+  branch: String
+
+  """Release name"""
+  release: String
+
+  """VCS Tag"""
+  tag: String
+
+  """VCS Commit Hash"""
+  commit_sha: String
+}
+
+""""""
+input PointListRef {
+  """"""
+  points: [PointRef!]!
+}
+
+""""""
+input AddVulnerabilityAnalysisInput {
+  """State such as exploitable"""
+  state: String
+
+  """Details for the state"""
+  detail: String
+}
+
+""""""
+type UpdatePropertiesPayload {
+  """"""
+  properties(filter: PropertiesFilter, order: PropertiesOrder, first: Int, offset: Int): [Properties]
+
+  """"""
+  numUids: Int
+}
+
+""""""
+input AddScanInput {
+  """Unique ID such as UUID or ULID"""
+  id: String!
+
+  """Boolean to represent if this scan was scheduled"""
+  isScheduled: Boolean
+
+  """"""
+  invokedBy: UserRef
+
+  """Creation date"""
+  created: DateTime!
+
+  """Optional validity date for this scan"""
+  validUntil: DateTime
+
+  """"""
+  applications: [ApplicationRef]
+
+  """List of custom tags"""
+  tags: [String]
+
+  """"""
+  result: ScanResultRef
+
+  """Direct link to the scan"""
+  url: String
+}
+
+""""""
+input BomServiceDataFilter {
+  """"""
+  has: [BomServiceDataHasFilter]
+
+  """"""
+  and: [BomServiceDataFilter]
+
+  """"""
+  or: [BomServiceDataFilter]
+
+  """"""
+  not: BomServiceDataFilter
+}
+
+""""""
+input Severity_hash {
+  """"""
+  eq: Severity
+
+  """"""
+  in: [Severity]
+}
+
+""""""
+input TeamRef {
+  """Unique ID such as UUID or ULID"""
+  id: String
+
+  """Team name"""
+  name: String
+
+  """Description of the team"""
+  description: String
+
+  """List of tags"""
+  tags: [String]
+
+  """"""
+  users: [UserRef]
+
+  """"""
+  applications: [ApplicationRef]
+
+  """Creation date"""
+  created: DateTime
+
+  """Modified date"""
+  modified: DateTime
+
+  """Is this team disabled?"""
+  disabled: Boolean
+}
+
+"""Represents an application"""
+type Application {
+  """Unique ID such as UUID or ULID"""
+  id: String!
+
+  """Name of the application"""
+  name: String!
+
+  """Description"""
+  description: String
+
+  """Environment where this application is hosted or tested"""
+  environment(filter: EnvironmentFilter): Environment
+
+  """Version of the application"""
+  version(filter: ApplicationVersionFilter): ApplicationVersion
+
+  """URL of the repository"""
+  repoUrl: String
+
+  """URL to the issues tracking system such as GitHub issues or Jira"""
+  issuesUrl: String
+
+  """URL to the CI environment"""
+  ciUrl: String
+
+  """URL to the CD environment"""
+  cdUrl: String
+
+  """URL to the change management system used"""
+  changeManagementUrl: String
+
+  """
+  List of programming languages used in the application, configurations and containers
+  """
+  languages: [String]
+
+  """List of frameworks and SDKs"""
+  frameworks: [String]
+
+  """List of custom classification"""
+  classification: [String]
+
+  """List of tags"""
+  tags: [String]
+
+  """Creation date"""
+  created: DateTime!
+
+  """Modified date"""
+  modified: DateTime!
+
+  """List of teams"""
+  teams(filter: TeamFilter, order: TeamOrder, first: Int, offset: Int): [Team]
+
+  """Is this application disabled?"""
+  disabled: Boolean
+
+  """"""
+  teamsAggregate(filter: TeamFilter): TeamAggregateResult
+}
+
+""""""
+input DateTimeFilter {
+  """"""
+  eq: DateTime
+
+  """"""
+  in: [DateTime]
+
+  """"""
+  le: DateTime
+
+  """"""
+  lt: DateTime
+
+  """"""
+  ge: DateTime
+
+  """"""
+  gt: DateTime
+
+  """"""
+  between: DateTimeRange
+}
+
+""""""
+enum PropertiesOrderable {
+  """"""
+  name
+
+  """"""
+  value
+}
+
+""""""
+input ComponentLicenseFilter {
+  """"""
+  id: StringHashFilter
+
+  """"""
+  has: [ComponentLicenseHasFilter]
+
+  """"""
+  and: [ComponentLicenseFilter]
+
+  """"""
+  or: [ComponentLicenseFilter]
+
+  """"""
+  not: ComponentLicenseFilter
+}
+
+""""""
+input UserPatch {
+  """Email"""
+  email: String
+
+  """Full name"""
+  fullName: String
+
+  """Creation date"""
+  created: DateTime
+
+  """Modified date"""
+  modified: DateTime
+
+  """"""
+  teams: [TeamRef]
+
+  """"""
+  roles: [UserRoleRef]
+
+  """Is this user account disabled?"""
+  disabled: Boolean
+
+  """"""
+  password: String
+}
+
+""""""
+type UpdateBomServicePayload {
+  """"""
+  bomService(filter: BomServiceFilter, order: BomServiceOrder, first: Int, offset: Int): [BomService]
+
+  """"""
+  numUids: Int
+}
+
+""""""
+input StringFullTextFilter_StringTermFilter {
+  """"""
+  alloftext: String
+
+  """"""
+  anyoftext: String
+
+  """"""
+  allofterms: String
+
+  """"""
+  anyofterms: String
+}
+
+""""""
+input UpdateVulnerabilityAdvisoryInput {
+  """"""
+  filter: VulnerabilityAdvisoryFilter!
+
+  """"""
+  set: VulnerabilityAdvisoryPatch
+
+  """"""
+  remove: VulnerabilityAdvisoryPatch
+}
+
+""""""
+input VulnerabilitySourceRef {
+  """Name such as NVD, GitHub"""
+  name: String
+
+  """URL"""
+  url: String
+}
+
+"""User"""
+type User {
+  """Unique ID such as UUID or ULID"""
+  id: String!
+
+  """Email"""
+  email: String!
+
+  """Full name"""
+  fullName: String!
+
+  """Creation date"""
+  created: DateTime!
+
+  """Modified date"""
+  modified: DateTime!
+
+  """List of teams"""
+  teams(filter: TeamFilter, order: TeamOrder, first: Int, offset: Int): [Team]
+
+  """List of roles"""
+  roles(filter: UserRoleFilter, order: UserRoleOrder, first: Int, offset: Int): [UserRole]
+
+  """Is this user account disabled?"""
+  disabled: Boolean
+
+  """"""
+  teamsAggregate(filter: TeamFilter): TeamAggregateResult
+
+  """"""
+  rolesAggregate(filter: UserRoleFilter): UserRoleAggregateResult
+}
+
+""""""
+enum DgraphIndex {
+  """"""
+  int
+
+  """"""
+  int64
+
+  """"""
+  float
+
+  """"""
+  bool
+
+  """"""
+  hash
+
+  """"""
+  exact
+
+  """"""
+  term
+
+  """"""
+  fulltext
+
+  """"""
+  trigram
+
+  """"""
+  regexp
+
+  """"""
+  year
+
+  """"""
+  month
+
+  """"""
+  day
+
+  """"""
+  hour
+
+  """"""
+  geo
+}
+
+""""""
+input PolygonRef {
+  """"""
+  coordinates: [PointListRef!]!
+}
+
+""""""
+type DeleteVulnerabilityRatingPayload {
+  """"""
+  vulnerabilityRating(filter: VulnerabilityRatingFilter, order: VulnerabilityRatingOrder, first: Int, offset: Int): [VulnerabilityRating]
+
+  """"""
+  msg: String
+
+  """"""
+  numUids: Int
+}
+
+""""""
+type UpdateComponentPayload {
+  """"""
+  component(filter: ComponentFilter, order: ComponentOrder, first: Int, offset: Int): [Component]
+
+  """"""
+  numUids: Int
+}
+
+""""""
+enum VulnerabilityVersionStatusHasFilter {
+  """"""
+  version
+
+  """"""
+  versionType
+
+  """"""
+  repo
+
+  """"""
+  lessThanOrEqual
+
+  """"""
+  lessThan
+
+  """"""
+  changes
+
+  """"""
+  status
+}
+
+""""""
+input ApplicationVersionOrder {
+  """"""
+  asc: ApplicationVersionOrderable
+
+  """"""
+  desc: ApplicationVersionOrderable
+
+  """"""
+  then: ApplicationVersionOrder
+}
+
+""""""
+input VulnerabilityDetailRef {
+  """"""
+  vulnerability: VulnerabilityRef
+
+  """Title"""
+  title: String
+
+  """Summary"""
+  summary: String
+
+  """Date the vulnerability became public"""
+  datePublic: DateTime
+
+  """Collection"""
+  collectionURL: String
+
+  """Default status such as affected"""
+  defaultStatus: String
+
+  """List of descriptions"""
+  descriptions: [String]
+
+  """List of modules affected"""
+  modules: [String]
+
+  """List of program files affected"""
+  programFiles: [String]
+
+  """List of program routines affected"""
+  programRoutines: [String]
+
+  """List of platforms affected"""
+  platforms: [String]
+
+  """"""
+  versions: [VulnerabilityVersionStatusRef]
+
+  """List of solutions to mitigate the vulnerability"""
+  solutions: [String]
+
+  """List of workarounds available"""
+  workarounds: [String]
+
+  """List of configurations to mitigate"""
+  configurations: [String]
+
+  """List of exploits"""
+  exploits: [String]
+
+  """List of timeline"""
+  timeline: [String]
+
+  """List of credits"""
+  credits: [String]
+
+  """List of references"""
+  references: [String]
+
+  """Source of the vulnerability detail such as NVD, GitHub"""
+  source: String
+}
+
+""""""
+input VulnerabilityRatingOrder {
+  """"""
+  asc: VulnerabilityRatingOrderable
+
+  """"""
+  desc: VulnerabilityRatingOrderable
+
+  """"""
+  then: VulnerabilityRatingOrder
+}
+
+"""Bom type"""
+type Bom {
+  """Serial number"""
+  serialNumber: String!
+
+  """BoM Metadata"""
+  metadata(filter: BomMetadataFilter): BomMetadata
+
+  """List of components"""
+  components(filter: ComponentFilter, order: ComponentOrder, first: Int, offset: Int): [Component!]!
+
+  """List of services"""
+  services(filter: BomServiceFilter, order: BomServiceOrder, first: Int, offset: Int): [BomService]
+
+  """Application for this BoM"""
+  application(filter: ApplicationFilter): Application
+
+  """Scan that uses this BoM"""
+  scan(filter: ScanFilter): Scan
+
+  """List of vulnerabilities"""
+  vulnerabilities(filter: VulnerabilityFilter, order: VulnerabilityOrder, first: Int, offset: Int): [Vulnerability]
+
+  """"""
+  componentsAggregate(filter: ComponentFilter): ComponentAggregateResult
+
+  """"""
+  servicesAggregate(filter: BomServiceFilter): BomServiceAggregateResult
+
+  """"""
+  vulnerabilitiesAggregate(filter: VulnerabilityFilter): VulnerabilityAggregateResult
+}
+
+"""Vulnerability analysis"""
+type VulnerabilityAnalysis {
+  """State such as exploitable"""
+  state: String
+
+  """Details for the state"""
+  detail: String
+}
+
+""""""
+type AddScanPayload {
+  """"""
+  scan(filter: ScanFilter, order: ScanOrder, first: Int, offset: Int): [Scan]
+
+  """"""
+  numUids: Int
+}
+
+""""""
+type BomServiceAggregateResult {
+  """"""
+  count: Int
+
+  """"""
+  bomRefMin: String
+
+  """"""
+  bomRefMax: String
+
+  """"""
+  groupMin: String
+
+  """"""
+  groupMax: String
+
+  """"""
+  nameMin: String
+
+  """"""
+  nameMax: String
+
+  """"""
+  versionMin: String
+
+  """"""
+  versionMax: String
+
+  """"""
+  descriptionMin: String
+
+  """"""
+  descriptionMax: String
+}
+
+""""""
+type UpdateVulnerabilityPayload {
+  """"""
+  vulnerability(filter: VulnerabilityFilter, order: VulnerabilityOrder, first: Int, offset: Int): [Vulnerability]
+
+  """"""
+  numUids: Int
+}
+
+""""""
+input EnvironmentOrder {
+  """"""
+  asc: EnvironmentOrderable
+
+  """"""
+  desc: EnvironmentOrderable
+
+  """"""
+  then: EnvironmentOrder
+}
+
+""""""
+input TeamFilter {
+  """"""
+  id: StringHashFilter
+
+  """"""
+  name: StringTermFilter
+
+  """"""
+  description: StringFullTextFilter_StringTermFilter
+
+  """"""
+  created: DateTimeFilter
+
+  """"""
+  modified: DateTimeFilter
+
+  """"""
+  has: [TeamHasFilter]
+
+  """"""
+  and: [TeamFilter]
+
+  """"""
+  or: [TeamFilter]
+
+  """"""
+  not: TeamFilter
+}
+
+""""""
+input UpdateVulnerabilityAnalysisInput {
+  """"""
+  filter: VulnerabilityAnalysisFilter!
+
+  """"""
+  set: VulnerabilityAnalysisPatch
+
+  """"""
+  remove: VulnerabilityAnalysisPatch
+}
+
+""""""
+input VulnerabilityPatch {
+  """ID such as CVE or GHSA id"""
+  id: String
+
+  """"""
+  source: VulnerabilitySourceRef
+
+  """"""
+  ratings: [VulnerabilityRatingRef]
+
+  """Default severity"""
+  severity: Severity
+
+  """Default CVSS scores"""
+  cvss_score: Float
+
+  """List of CWE"""
+  cwes: [Int]
+
+  """Description"""
+  description: String
+
+  """Recommendation"""
+  recommendation: String
+
+  """"""
+  advisories: [VulnerabilityAdvisoryRef]
+
+  """"""
+  analysis: VulnerabilityAnalysisRef
+
+  """"""
+  affects: [ComponentRef]
+
+  """Affected version"""
+  version: String
+
+  """Fix version"""
+  fix_version: String
+
+  """"""
+  properties: [PropertiesRef]
+
+  """"""
+  detail: VulnerabilityDetailRef
+}
+
+""""""
+type AddBomPayload {
+  """"""
+  bom(filter: BomFilter, order: BomOrder, first: Int, offset: Int): [Bom]
+
+  """"""
+  numUids: Int
+}
+
+""""""
+type AddVulnerabilityRatingPayload {
+  """"""
+  vulnerabilityRating(filter: VulnerabilityRatingFilter, order: VulnerabilityRatingOrder, first: Int, offset: Int): [VulnerabilityRating]
+
+  """"""
+  numUids: Int
+}
+
+""""""
+type DeleteComponentPayload {
+  """"""
+  component(filter: ComponentFilter, order: ComponentOrder, first: Int, offset: Int): [Component]
+
+  """"""
+  msg: String
+
+  """"""
+  numUids: Int
+}
+
+""""""
+type DeleteUserPayload {
+  """"""
+  user(filter: UserFilter, order: UserOrder, first: Int, offset: Int): [User]
+
+  """"""
+  msg: String
+
+  """"""
+  numUids: Int
+}
+
+""""""
+type ScanAggregateResult {
+  """"""
+  count: Int
+
+  """"""
+  idMin: String
+
+  """"""
+  idMax: String
+
+  """"""
+  createdMin: DateTime
+
+  """"""
+  createdMax: DateTime
+
+  """"""
+  validUntilMin: DateTime
+
+  """"""
+  validUntilMax: DateTime
+
+  """"""
+  urlMin: String
+
+  """"""
+  urlMax: String
+}
+
+""""""
+type UpdateBomMetadataPayload {
+  """"""
+  bomMetadata(filter: BomMetadataFilter, order: BomMetadataOrder, first: Int, offset: Int): [BomMetadata]
+
+  """"""
+  numUids: Int
+}
+
+""""""
+type VulnerabilityVersionChangesAggregateResult {
+  """"""
+  count: Int
+
+  """"""
+  atMin: String
+
+  """"""
+  atMax: String
+}
+
+""""""
+input AddVulnerabilitySourceInput {
+  """Name such as NVD, GitHub"""
+  name: String
+
+  """URL"""
+  url: String
+}
+
+""""""
+input AddVulnerabilityVersionStatusInput {
+  """Version string"""
+  version: String!
+
+  """Version type such as semver"""
+  versionType: String
+
+  """Repository"""
+  repo: String
+
+  """"""
+  lessThanOrEqual: String
+
+  """"""
+  lessThan: String
+
+  """"""
+  changes: [VulnerabilityVersionChangesRef]
+
+  """Status"""
+  status: VulnerabilityVersionStatusEnum!
+}
+
+"""Team"""
+type Team {
+  """Unique ID such as UUID or ULID"""
+  id: String!
+
+  """Team name"""
+  name: String!
+
+  """Description of the team"""
+  description: String
+
+  """List of tags"""
+  tags: [String]
+
+  """List of users"""
+  users(filter: UserFilter, order: UserOrder, first: Int, offset: Int): [User]
+
+  """List of applications"""
+  applications(filter: ApplicationFilter, order: ApplicationOrder, first: Int, offset: Int): [Application]
+
+  """Creation date"""
+  created: DateTime!
+
+  """Modified date"""
+  modified: DateTime!
+
+  """Is this team disabled?"""
+  disabled: Boolean
+
+  """"""
+  usersAggregate(filter: UserFilter): UserAggregateResult
+
+  """"""
+  applicationsAggregate(filter: ApplicationFilter): ApplicationAggregateResult
+}
+
+"""Scan of an application"""
+type Scan {
+  """Unique ID such as UUID or ULID"""
+  id: String!
+
+  """Boolean to represent if this scan was scheduled"""
+  isScheduled: Boolean
+
+  """User who invoked this scan if manual"""
+  invokedBy(filter: UserFilter): User
+
+  """Creation date"""
+  created: DateTime!
+
+  """Optional validity date for this scan"""
+  validUntil: DateTime
+
+  """List of applications scanned"""
+  applications(filter: ApplicationFilter, order: ApplicationOrder, first: Int, offset: Int): [Application]
+
+  """List of custom tags"""
+  tags: [String]
+
+  """Link to a scan result"""
+  result(filter: ScanResultFilter): ScanResult
+
+  """Direct link to the scan"""
+  url: String
+
+  """"""
+  applicationsAggregate(filter: ApplicationFilter): ApplicationAggregateResult
+}
+
+""""""
+input PointGeoFilter {
+  """"""
+  near: NearFilter
+
+  """"""
+  within: WithinFilter
+}
+
+""""""
+input AddVulnerabilityInput {
+  """Unique reference within a BoM"""
+  bomRef: String!
+
+  """ID such as CVE or GHSA id"""
+  id: String!
+
+  """"""
+  source: VulnerabilitySourceRef
+
+  """"""
+  ratings: [VulnerabilityRatingRef]
+
+  """Default severity"""
+  severity: Severity!
+
+  """Default CVSS scores"""
+  cvss_score: Float!
+
+  """List of CWE"""
+  cwes: [Int]
+
+  """Description"""
+  description: String
+
+  """Recommendation"""
+  recommendation: String
+
+  """"""
+  advisories: [VulnerabilityAdvisoryRef]
+
+  """"""
+  analysis: VulnerabilityAnalysisRef
+
+  """"""
+  affects: [ComponentRef]
+
+  """Affected version"""
+  version: String!
+
+  """Fix version"""
+  fix_version: String
+
+  """"""
+  properties: [PropertiesRef]
+
+  """"""
+  detail: VulnerabilityDetailRef
+}
+
+""""""
+input UserFilter {
+  """"""
+  id: StringHashFilter
+
+  """"""
+  email: StringTermFilter
+
+  """"""
+  fullName: StringFullTextFilter_StringTermFilter
+
+  """"""
+  created: DateTimeFilter
+
+  """"""
+  modified: DateTimeFilter
+
+  """"""
+  has: [UserHasFilter]
+
+  """"""
+  and: [UserFilter]
+
+  """"""
+  or: [UserFilter]
+
+  """"""
+  not: UserFilter
 }
 
 """"""
@@ -6085,42 +5084,1516 @@ input UserRoleFilter {
   not: UserRoleFilter
 }
 
+"""Vulnerability Rating"""
+type VulnerabilityRating {
+  """Severity such as critical, high"""
+  severity: Severity!
+
+  """Score"""
+  score: Float!
+
+  """Method used to determine the score"""
+  method: String
+}
+
 """"""
-type BomService {
+type DeleteVulnerabilityDetailPayload {
   """"""
-  bomRef: String!
+  vulnerabilityDetail(filter: VulnerabilityDetailFilter, order: VulnerabilityDetailOrder, first: Int, offset: Int): [VulnerabilityDetail]
 
   """"""
-  group: String!
+  msg: String
 
   """"""
-  name: String!
+  numUids: Int
+}
+
+""""""
+enum UserOrderable {
+  """"""
+  id
 
   """"""
-  version: String!
+  email
 
   """"""
+  fullName
+
+  """"""
+  created
+
+  """"""
+  modified
+}
+
+""""""
+input ApplicationPatch {
+  """Name of the application"""
+  name: String
+
+  """Description"""
   description: String
 
   """"""
+  environment: EnvironmentRef
+
+  """"""
+  version: ApplicationVersionRef
+
+  """URL of the repository"""
+  repoUrl: String
+
+  """URL to the issues tracking system such as GitHub issues or Jira"""
+  issuesUrl: String
+
+  """URL to the CI environment"""
+  ciUrl: String
+
+  """URL to the CD environment"""
+  cdUrl: String
+
+  """URL to the change management system used"""
+  changeManagementUrl: String
+
+  """
+  List of programming languages used in the application, configurations and containers
+  """
+  languages: [String]
+
+  """List of frameworks and SDKs"""
+  frameworks: [String]
+
+  """List of custom classification"""
+  classification: [String]
+
+  """List of tags"""
+  tags: [String]
+
+  """Creation date"""
+  created: DateTime
+
+  """Modified date"""
+  modified: DateTime
+
+  """"""
+  teams: [TeamRef]
+
+  """Is this application disabled?"""
+  disabled: Boolean
+}
+
+""""""
+type DeleteVulnerabilityVersionStatusPayload {
+  """"""
+  vulnerabilityVersionStatus(filter: VulnerabilityVersionStatusFilter, order: VulnerabilityVersionStatusOrder, first: Int, offset: Int): [VulnerabilityVersionStatus]
+
+  """"""
+  msg: String
+
+  """"""
+  numUids: Int
+}
+
+""""""
+type UpdateUserRolePayload {
+  """"""
+  userRole(filter: UserRoleFilter, order: UserRoleOrder, first: Int, offset: Int): [UserRole]
+
+  """"""
+  numUids: Int
+}
+
+""""""
+type UserAggregateResult {
+  """"""
+  count: Int
+
+  """"""
+  idMin: String
+
+  """"""
+  idMax: String
+
+  """"""
+  emailMin: String
+
+  """"""
+  emailMax: String
+
+  """"""
+  fullNameMin: String
+
+  """"""
+  fullNameMax: String
+
+  """"""
+  createdMin: DateTime
+
+  """"""
+  createdMax: DateTime
+
+  """"""
+  modifiedMin: DateTime
+
+  """"""
+  modifiedMax: DateTime
+}
+
+""""""
+enum BomMetadataHasFilter {
+  """"""
+  timestamp
+
+  """"""
+  component
+}
+
+""""""
+enum UserHasFilter {
+  """"""
+  id
+
+  """"""
+  email
+
+  """"""
+  fullName
+
+  """"""
+  created
+
+  """"""
+  modified
+
+  """"""
+  teams
+
+  """"""
+  roles
+
+  """"""
+  disabled
+}
+
+""""""
+input AddApplicationVersionInput {
+  """Branch name"""
+  branch: String
+
+  """Release name"""
+  release: String
+
+  """VCS Tag"""
+  tag: String
+
+  """VCS Commit Hash"""
+  commit_sha: String
+}
+
+""""""
+input ApplicationVersionFilter {
+  """"""
+  has: [ApplicationVersionHasFilter]
+
+  """"""
+  and: [ApplicationVersionFilter]
+
+  """"""
+  or: [ApplicationVersionFilter]
+
+  """"""
+  not: ApplicationVersionFilter
+}
+
+""""""
+input BomServiceDataPatch {
+  """Data name"""
+  data: String
+
+  """Flow of data - inbound, outbound etc"""
+  flow: [String]
+
+  """Classification of data"""
+  classification: [String]
+}
+
+""""""
+input UpdateVulnerabilityInput {
+  """"""
+  filter: VulnerabilityFilter!
+
+  """"""
+  set: VulnerabilityPatch
+
+  """"""
+  remove: VulnerabilityPatch
+}
+
+"""Status of a specific vulnerability version"""
+enum VulnerabilityVersionStatusEnum {
+  """"""
+  affected
+
+  """"""
+  unaffected
+}
+
+""""""
+type UpdateUserPayload {
+  """"""
+  user(filter: UserFilter, order: UserOrder, first: Int, offset: Int): [User]
+
+  """"""
+  numUids: Int
+}
+
+""""""
+input UpdateComponentInput {
+  """"""
+  filter: ComponentFilter!
+
+  """"""
+  set: ComponentPatch
+
+  """"""
+  remove: ComponentPatch
+}
+
+""""""
+input VulnerabilityAdvisoryRef {
+  """Title"""
+  title: String
+
+  """URL to the advisory"""
+  url: String
+}
+
+""""""
+input StringExactFilter {
+  """"""
+  eq: String
+
+  """"""
+  in: [String]
+
+  """"""
+  le: String
+
+  """"""
+  lt: String
+
+  """"""
+  ge: String
+
+  """"""
+  gt: String
+
+  """"""
+  between: StringRange
+}
+
+""""""
+enum ComponentHasFilter {
+  """"""
+  isRoot
+
+  """"""
+  bomRef
+
+  """"""
+  group
+
+  """"""
+  name
+
+  """"""
+  description
+
+  """"""
+  ctype
+
+  """"""
+  subPath
+
+  """"""
+  repoUrl
+
+  """"""
+  downloadUrl
+
+  """"""
+  publisher
+
+  """"""
+  licenses
+
+  """"""
+  scope
+
+  """"""
+  version
+
+  """"""
+  purl
+
+  """"""
+  vulnerabilities
+
+  """"""
+  properties
+
+  """"""
+  dependency
+
+  """"""
+  appearsIn
+}
+
+""""""
+enum VulnerabilityAnalysisOrderable {
+  """"""
+  state
+
+  """"""
+  detail
+}
+
+""""""
+input BomMetadataRef {
+  """Creation Timestamp"""
+  timestamp: DateTime
+
+  """"""
+  component: ComponentRef
+}
+
+""""""
+input VulnerabilityVersionChangesRef {
+  """"""
+  at: String
+
+  """"""
+  status: VulnerabilityVersionStatusEnum
+}
+
+""""""
+enum VulnerabilityAdvisoryOrderable {
+  """"""
+  title
+
+  """"""
+  url
+}
+
+""""""
+input BomMetadataPatch {
+  """Creation Timestamp"""
+  timestamp: DateTime
+
+  """"""
+  component: ComponentRef
+}
+
+""""""
+input BomServiceDataOrder {
+  """"""
+  asc: BomServiceDataOrderable
+
+  """"""
+  desc: BomServiceDataOrderable
+
+  """"""
+  then: BomServiceDataOrder
+}
+
+""""""
+input UpdateVulnerabilityDetailInput {
+  """"""
+  filter: VulnerabilityDetailFilter!
+
+  """"""
+  set: VulnerabilityDetailPatch
+
+  """"""
+  remove: VulnerabilityDetailPatch
+}
+
+""""""
+input VulnerabilityRef {
+  """Unique reference within a BoM"""
+  bomRef: String
+
+  """ID such as CVE or GHSA id"""
+  id: String
+
+  """"""
+  source: VulnerabilitySourceRef
+
+  """"""
+  ratings: [VulnerabilityRatingRef]
+
+  """Default severity"""
+  severity: Severity
+
+  """Default CVSS scores"""
+  cvss_score: Float
+
+  """List of CWE"""
+  cwes: [Int]
+
+  """Description"""
+  description: String
+
+  """Recommendation"""
+  recommendation: String
+
+  """"""
+  advisories: [VulnerabilityAdvisoryRef]
+
+  """"""
+  analysis: VulnerabilityAnalysisRef
+
+  """"""
+  affects: [ComponentRef]
+
+  """Affected version"""
+  version: String
+
+  """Fix version"""
+  fix_version: String
+
+  """"""
+  properties: [PropertiesRef]
+
+  """"""
+  detail: VulnerabilityDetailRef
+}
+
+""""""
+input MultiPolygonRef {
+  """"""
+  polygons: [PolygonRef!]!
+}
+
+""""""
+type AddApplicationVersionPayload {
+  """"""
+  applicationVersion(filter: ApplicationVersionFilter, order: ApplicationVersionOrder, first: Int, offset: Int): [ApplicationVersion]
+
+  """"""
+  numUids: Int
+}
+
+""""""
+type AddVulnerabilityAdvisoryPayload {
+  """"""
+  vulnerabilityAdvisory(filter: VulnerabilityAdvisoryFilter, order: VulnerabilityAdvisoryOrder, first: Int, offset: Int): [VulnerabilityAdvisory]
+
+  """"""
+  numUids: Int
+}
+
+""""""
+input ApplicationVersionRef {
+  """Branch name"""
+  branch: String
+
+  """Release name"""
+  release: String
+
+  """VCS Tag"""
+  tag: String
+
+  """VCS Commit Hash"""
+  commit_sha: String
+}
+
+""""""
+input UserRef {
+  """Unique ID such as UUID or ULID"""
+  id: String
+
+  """Email"""
+  email: String
+
+  """Full name"""
+  fullName: String
+
+  """Creation date"""
+  created: DateTime
+
+  """Modified date"""
+  modified: DateTime
+
+  """"""
+  teams: [TeamRef]
+
+  """"""
+  roles: [UserRoleRef]
+
+  """Is this user account disabled?"""
+  disabled: Boolean
+
+  """"""
+  password: String
+}
+
+""""""
+input VulnerabilityVersionStatusRef {
+  """Version string"""
+  version: String
+
+  """Version type such as semver"""
+  versionType: String
+
+  """Repository"""
+  repo: String
+
+  """"""
+  lessThanOrEqual: String
+
+  """"""
+  lessThan: String
+
+  """"""
+  changes: [VulnerabilityVersionChangesRef]
+
+  """Status"""
+  status: VulnerabilityVersionStatusEnum
+}
+
+""""""
+type ComponentLicenseAggregateResult {
+  """"""
+  count: Int
+
+  """"""
+  idMin: String
+
+  """"""
+  idMax: String
+
+  """"""
+  nameMin: String
+
+  """"""
+  nameMax: String
+
+  """"""
+  textMin: String
+
+  """"""
+  textMax: String
+
+  """"""
+  urlMin: String
+
+  """"""
+  urlMax: String
+
+  """"""
+  expressionMin: String
+
+  """"""
+  expressionMax: String
+}
+
+""""""
+type ScanResultAggregateResult {
+  """"""
+  count: Int
+
+  """"""
+  idMin: String
+
+  """"""
+  idMax: String
+
+  """"""
+  createdMin: DateTime
+
+  """"""
+  createdMax: DateTime
+
+  """"""
+  validUntilMin: DateTime
+
+  """"""
+  validUntilMax: DateTime
+
+  """"""
+  urlMin: String
+
+  """"""
+  urlMax: String
+
+  """"""
+  htmlUrlMin: String
+
+  """"""
+  htmlUrlMax: String
+
+  """"""
+  csvUrlMin: String
+
+  """"""
+  csvUrlMax: String
+
+  """"""
+  pdfUrlMin: String
+
+  """"""
+  pdfUrlMax: String
+}
+
+""""""
+input AddApplicationInput {
+  """Unique ID such as UUID or ULID"""
+  id: String!
+
+  """Name of the application"""
+  name: String!
+
+  """Description"""
+  description: String
+
+  """"""
+  environment: EnvironmentRef
+
+  """"""
+  version: ApplicationVersionRef
+
+  """URL of the repository"""
+  repoUrl: String
+
+  """URL to the issues tracking system such as GitHub issues or Jira"""
+  issuesUrl: String
+
+  """URL to the CI environment"""
+  ciUrl: String
+
+  """URL to the CD environment"""
+  cdUrl: String
+
+  """URL to the change management system used"""
+  changeManagementUrl: String
+
+  """
+  List of programming languages used in the application, configurations and containers
+  """
+  languages: [String]
+
+  """List of frameworks and SDKs"""
+  frameworks: [String]
+
+  """List of custom classification"""
+  classification: [String]
+
+  """List of tags"""
+  tags: [String]
+
+  """Creation date"""
+  created: DateTime!
+
+  """Modified date"""
+  modified: DateTime!
+
+  """"""
+  teams: [TeamRef]
+
+  """Is this application disabled?"""
+  disabled: Boolean
+}
+
+""""""
+input AddUserInput {
+  """Unique ID such as UUID or ULID"""
+  id: String!
+
+  """Email"""
+  email: String!
+
+  """Full name"""
+  fullName: String!
+
+  """Creation date"""
+  created: DateTime!
+
+  """Modified date"""
+  modified: DateTime!
+
+  """"""
+  teams: [TeamRef]
+
+  """"""
+  roles: [UserRoleRef]
+
+  """Is this user account disabled?"""
+  disabled: Boolean
+
+  """"""
+  password: String!
+}
+
+""""""
+input AddVulnerabilityAdvisoryInput {
+  """Title"""
+  title: String
+
+  """URL to the advisory"""
+  url: String
+}
+
+""""""
+input UserOrder {
+  """"""
+  asc: UserOrderable
+
+  """"""
+  desc: UserOrderable
+
+  """"""
+  then: UserOrder
+}
+
+""""""
+input UserRoleRef {
+  """Unique ID such as UUID or ULID"""
+  id: String
+
+  """"""
+  user: UserRef
+
+  """"""
+  team: TeamRef
+
+  """Role string. Example: administrator, developer, security"""
+  role: String
+
+  """Creation date"""
+  created: DateTime
+
+  """Modified date"""
+  modified: DateTime
+
+  """Is this role disabled?"""
+  disabled: Boolean
+}
+
+""""""
+input VulnerabilitySourceOrder {
+  """"""
+  asc: VulnerabilitySourceOrderable
+
+  """"""
+  desc: VulnerabilitySourceOrderable
+
+  """"""
+  then: VulnerabilitySourceOrder
+}
+
+""""""
+input FloatRange {
+  """"""
+  min: Float!
+
+  """"""
+  max: Float!
+}
+
+""""""
+type AddEnvironmentPayload {
+  """"""
+  environment(filter: EnvironmentFilter, order: EnvironmentOrder, first: Int, offset: Int): [Environment]
+
+  """"""
+  numUids: Int
+}
+
+""""""
+input ApplicationFilter {
+  """"""
+  id: StringHashFilter
+
+  """"""
+  name: StringRegExpFilter_StringTermFilter
+
+  """"""
+  description: StringFullTextFilter_StringTermFilter
+
+  """"""
+  created: DateTimeFilter
+
+  """"""
+  modified: DateTimeFilter
+
+  """"""
+  has: [ApplicationHasFilter]
+
+  """"""
+  and: [ApplicationFilter]
+
+  """"""
+  or: [ApplicationFilter]
+
+  """"""
+  not: ApplicationFilter
+}
+
+""""""
+input ScanRef {
+  """Unique ID such as UUID or ULID"""
+  id: String
+
+  """Boolean to represent if this scan was scheduled"""
+  isScheduled: Boolean
+
+  """"""
+  invokedBy: UserRef
+
+  """Creation date"""
+  created: DateTime
+
+  """Optional validity date for this scan"""
+  validUntil: DateTime
+
+  """"""
+  applications: [ApplicationRef]
+
+  """List of custom tags"""
+  tags: [String]
+
+  """"""
+  result: ScanResultRef
+
+  """Direct link to the scan"""
+  url: String
+}
+
+""""""
+input IntRange {
+  """"""
+  min: Int!
+
+  """"""
+  max: Int!
+}
+
+""""""
+type BomMetadataAggregateResult {
+  """"""
+  count: Int
+
+  """"""
+  timestampMin: DateTime
+
+  """"""
+  timestampMax: DateTime
+}
+
+""""""
+enum BomServiceDataOrderable {
+  """"""
+  data
+}
+
+""""""
+input ScanResultOrder {
+  """"""
+  asc: ScanResultOrderable
+
+  """"""
+  desc: ScanResultOrderable
+
+  """"""
+  then: ScanResultOrder
+}
+
+""""""
+input UpdateUserInput {
+  """"""
+  filter: UserFilter!
+
+  """"""
+  set: UserPatch
+
+  """"""
+  remove: UserPatch
+}
+
+""""""
+input VulnerabilityDetailFilter {
+  """"""
+  title: StringTermFilter
+
+  """"""
+  summary: StringFullTextFilter_StringTermFilter
+
+  """"""
+  has: [VulnerabilityDetailHasFilter]
+
+  """"""
+  and: [VulnerabilityDetailFilter]
+
+  """"""
+  or: [VulnerabilityDetailFilter]
+
+  """"""
+  not: VulnerabilityDetailFilter
+}
+
+""""""
+type AddScanResultPayload {
+  """"""
+  scanResult(filter: ScanResultFilter, order: ScanResultOrder, first: Int, offset: Int): [ScanResult]
+
+  """"""
+  numUids: Int
+}
+
+""""""
+type DeleteVulnerabilitySourcePayload {
+  """"""
+  vulnerabilitySource(filter: VulnerabilitySourceFilter, order: VulnerabilitySourceOrder, first: Int, offset: Int): [VulnerabilitySource]
+
+  """"""
+  msg: String
+
+  """"""
+  numUids: Int
+}
+
+""""""
+input AddBomInput {
+  """Serial number"""
+  serialNumber: String!
+
+  """"""
+  metadata: BomMetadataRef
+
+  """"""
+  components: [ComponentRef!]!
+
+  """"""
+  services: [BomServiceRef]
+
+  """"""
+  application: ApplicationRef
+
+  """"""
+  scan: ScanRef
+
+  """"""
+  vulnerabilities: [VulnerabilityRef]
+}
+
+""""""
+type Query {
+  """"""
+  getUser(id: String!): User
+
+  """"""
+  checkUserPassword(id: String!, password: String!): User
+
+  """"""
+  queryUser(filter: UserFilter, order: UserOrder, first: Int, offset: Int): [User]
+
+  """"""
+  aggregateUser(filter: UserFilter): UserAggregateResult
+
+  """"""
+  getTeam(id: String!): Team
+
+  """"""
+  queryTeam(filter: TeamFilter, order: TeamOrder, first: Int, offset: Int): [Team]
+
+  """"""
+  aggregateTeam(filter: TeamFilter): TeamAggregateResult
+
+  """"""
+  getUserRole(id: String!): UserRole
+
+  """"""
+  queryUserRole(filter: UserRoleFilter, order: UserRoleOrder, first: Int, offset: Int): [UserRole]
+
+  """"""
+  aggregateUserRole(filter: UserRoleFilter): UserRoleAggregateResult
+
+  """"""
+  getScanResult(id: String!): ScanResult
+
+  """"""
+  queryScanResult(filter: ScanResultFilter, order: ScanResultOrder, first: Int, offset: Int): [ScanResult]
+
+  """"""
+  aggregateScanResult(filter: ScanResultFilter): ScanResultAggregateResult
+
+  """"""
+  getScan(id: String!): Scan
+
+  """"""
+  queryScan(filter: ScanFilter, order: ScanOrder, first: Int, offset: Int): [Scan]
+
+  """"""
+  aggregateScan(filter: ScanFilter): ScanAggregateResult
+
+  """"""
+  getEnvironment(id: String!): Environment
+
+  """"""
+  queryEnvironment(filter: EnvironmentFilter, order: EnvironmentOrder, first: Int, offset: Int): [Environment]
+
+  """"""
+  aggregateEnvironment(filter: EnvironmentFilter): EnvironmentAggregateResult
+
+  """"""
+  queryApplicationVersion(filter: ApplicationVersionFilter, order: ApplicationVersionOrder, first: Int, offset: Int): [ApplicationVersion]
+
+  """"""
+  aggregateApplicationVersion(filter: ApplicationVersionFilter): ApplicationVersionAggregateResult
+
+  """"""
+  getApplication(id: String!): Application
+
+  """"""
+  queryApplication(filter: ApplicationFilter, order: ApplicationOrder, first: Int, offset: Int): [Application]
+
+  """"""
+  aggregateApplication(filter: ApplicationFilter): ApplicationAggregateResult
+
+  """"""
+  queryProperties(filter: PropertiesFilter, order: PropertiesOrder, first: Int, offset: Int): [Properties]
+
+  """"""
+  aggregateProperties(filter: PropertiesFilter): PropertiesAggregateResult
+
+  """"""
+  queryBomMetadata(filter: BomMetadataFilter, order: BomMetadataOrder, first: Int, offset: Int): [BomMetadata]
+
+  """"""
+  aggregateBomMetadata(filter: BomMetadataFilter): BomMetadataAggregateResult
+
+  """"""
+  queryComponentLicense(filter: ComponentLicenseFilter, order: ComponentLicenseOrder, first: Int, offset: Int): [ComponentLicense]
+
+  """"""
+  aggregateComponentLicense(filter: ComponentLicenseFilter): ComponentLicenseAggregateResult
+
+  """"""
+  getComponent(purl: String!): Component
+
+  """"""
+  queryComponent(filter: ComponentFilter, order: ComponentOrder, first: Int, offset: Int): [Component]
+
+  """"""
+  aggregateComponent(filter: ComponentFilter): ComponentAggregateResult
+
+  """"""
+  queryBomServiceData(filter: BomServiceDataFilter, order: BomServiceDataOrder, first: Int, offset: Int): [BomServiceData]
+
+  """"""
+  aggregateBomServiceData(filter: BomServiceDataFilter): BomServiceDataAggregateResult
+
+  """"""
+  queryBomService(filter: BomServiceFilter, order: BomServiceOrder, first: Int, offset: Int): [BomService]
+
+  """"""
+  aggregateBomService(filter: BomServiceFilter): BomServiceAggregateResult
+
+  """"""
+  getBom(serialNumber: String!): Bom
+
+  """"""
+  queryBom(filter: BomFilter, order: BomOrder, first: Int, offset: Int): [Bom]
+
+  """"""
+  aggregateBom(filter: BomFilter): BomAggregateResult
+
+  """"""
+  queryVulnerabilityVersionChanges(filter: VulnerabilityVersionChangesFilter, order: VulnerabilityVersionChangesOrder, first: Int, offset: Int): [VulnerabilityVersionChanges]
+
+  """"""
+  aggregateVulnerabilityVersionChanges(filter: VulnerabilityVersionChangesFilter): VulnerabilityVersionChangesAggregateResult
+
+  """"""
+  queryVulnerabilityVersionStatus(filter: VulnerabilityVersionStatusFilter, order: VulnerabilityVersionStatusOrder, first: Int, offset: Int): [VulnerabilityVersionStatus]
+
+  """"""
+  aggregateVulnerabilityVersionStatus(filter: VulnerabilityVersionStatusFilter): VulnerabilityVersionStatusAggregateResult
+
+  """"""
+  queryVulnerabilityDetail(filter: VulnerabilityDetailFilter, order: VulnerabilityDetailOrder, first: Int, offset: Int): [VulnerabilityDetail]
+
+  """"""
+  aggregateVulnerabilityDetail(filter: VulnerabilityDetailFilter): VulnerabilityDetailAggregateResult
+
+  """"""
+  queryVulnerabilitySource(filter: VulnerabilitySourceFilter, order: VulnerabilitySourceOrder, first: Int, offset: Int): [VulnerabilitySource]
+
+  """"""
+  aggregateVulnerabilitySource(filter: VulnerabilitySourceFilter): VulnerabilitySourceAggregateResult
+
+  """"""
+  queryVulnerabilityAdvisory(filter: VulnerabilityAdvisoryFilter, order: VulnerabilityAdvisoryOrder, first: Int, offset: Int): [VulnerabilityAdvisory]
+
+  """"""
+  aggregateVulnerabilityAdvisory(filter: VulnerabilityAdvisoryFilter): VulnerabilityAdvisoryAggregateResult
+
+  """"""
+  queryVulnerabilityRating(filter: VulnerabilityRatingFilter, order: VulnerabilityRatingOrder, first: Int, offset: Int): [VulnerabilityRating]
+
+  """"""
+  aggregateVulnerabilityRating(filter: VulnerabilityRatingFilter): VulnerabilityRatingAggregateResult
+
+  """"""
+  queryVulnerabilityAnalysis(filter: VulnerabilityAnalysisFilter, order: VulnerabilityAnalysisOrder, first: Int, offset: Int): [VulnerabilityAnalysis]
+
+  """"""
+  aggregateVulnerabilityAnalysis(filter: VulnerabilityAnalysisFilter): VulnerabilityAnalysisAggregateResult
+
+  """"""
+  getVulnerability(bomRef: String!): Vulnerability
+
+  """"""
+  queryVulnerability(filter: VulnerabilityFilter, order: VulnerabilityOrder, first: Int, offset: Int): [Vulnerability]
+
+  """"""
+  aggregateVulnerability(filter: VulnerabilityFilter): VulnerabilityAggregateResult
+}
+
+""""""
+type DeleteEnvironmentPayload {
+  """"""
+  environment(filter: EnvironmentFilter, order: EnvironmentOrder, first: Int, offset: Int): [Environment]
+
+  """"""
+  msg: String
+
+  """"""
+  numUids: Int
+}
+
+""""""
+enum BomHasFilter {
+  """"""
+  serialNumber
+
+  """"""
+  metadata
+
+  """"""
+  components
+
+  """"""
+  services
+
+  """"""
+  application
+
+  """"""
+  scan
+
+  """"""
+  vulnerabilities
+}
+
+""""""
+input AddPropertiesInput {
+  """Property name"""
+  name: String!
+
+  """Property value"""
+  value: String!
+}
+
+""""""
+input ComponentOrder {
+  """"""
+  asc: ComponentOrderable
+
+  """"""
+  desc: ComponentOrderable
+
+  """"""
+  then: ComponentOrder
+}
+
+""""""
+input WithinFilter {
+  """"""
+  polygon: PolygonRef!
+}
+
+""""""
+type UpdateVulnerabilityRatingPayload {
+  """"""
+  vulnerabilityRating(filter: VulnerabilityRatingFilter, order: VulnerabilityRatingOrder, first: Int, offset: Int): [VulnerabilityRating]
+
+  """"""
+  numUids: Int
+}
+
+""""""
+input BomPatch {
+  """"""
+  metadata: BomMetadataRef
+
+  """"""
+  components: [ComponentRef!]
+
+  """"""
+  services: [BomServiceRef]
+
+  """"""
+  application: ApplicationRef
+
+  """"""
+  scan: ScanRef
+
+  """"""
+  vulnerabilities: [VulnerabilityRef]
+}
+
+""""""
+input VulnerabilityVersionChangesPatch {
+  """"""
+  at: String
+
+  """"""
+  status: VulnerabilityVersionStatusEnum
+}
+
+"""Severity of the vulnerability"""
+enum Severity {
+  """"""
+  critical
+
+  """"""
+  high
+
+  """"""
+  medium
+
+  """"""
+  low
+
+  """"""
+  info
+
+  """"""
+  none
+
+  """"""
+  unknown
+}
+
+"""Advisory"""
+type VulnerabilityAdvisory {
+  """Title"""
+  title: String
+
+  """URL to the advisory"""
+  url: String
+}
+
+""""""
+enum VulnerabilitySourceHasFilter {
+  """"""
+  name
+
+  """"""
+  url
+}
+
+""""""
+input VulnerabilityDetailPatch {
+  """"""
+  vulnerability: VulnerabilityRef
+
+  """Title"""
+  title: String
+
+  """Summary"""
+  summary: String
+
+  """Date the vulnerability became public"""
+  datePublic: DateTime
+
+  """Collection"""
+  collectionURL: String
+
+  """Default status such as affected"""
+  defaultStatus: String
+
+  """List of descriptions"""
+  descriptions: [String]
+
+  """List of modules affected"""
+  modules: [String]
+
+  """List of program files affected"""
+  programFiles: [String]
+
+  """List of program routines affected"""
+  programRoutines: [String]
+
+  """List of platforms affected"""
+  platforms: [String]
+
+  """"""
+  versions: [VulnerabilityVersionStatusRef]
+
+  """List of solutions to mitigate the vulnerability"""
+  solutions: [String]
+
+  """List of workarounds available"""
+  workarounds: [String]
+
+  """List of configurations to mitigate"""
+  configurations: [String]
+
+  """List of exploits"""
+  exploits: [String]
+
+  """List of timeline"""
+  timeline: [String]
+
+  """List of credits"""
+  credits: [String]
+
+  """List of references"""
+  references: [String]
+
+  """Source of the vulnerability detail such as NVD, GitHub"""
+  source: String
+}
+
+""""""
+input ContainsFilter {
+  """"""
+  point: PointRef
+
+  """"""
+  polygon: PolygonRef
+}
+
+""""""
+type DeleteScanResultPayload {
+  """"""
+  scanResult(filter: ScanResultFilter, order: ScanResultOrder, first: Int, offset: Int): [ScanResult]
+
+  """"""
+  msg: String
+
+  """"""
+  numUids: Int
+}
+
+""""""
+type VulnerabilityRatingAggregateResult {
+  """"""
+  count: Int
+
+  """"""
+  scoreMin: Float
+
+  """"""
+  scoreMax: Float
+
+  """"""
+  scoreSum: Float
+
+  """"""
+  scoreAvg: Float
+
+  """"""
+  methodMin: String
+
+  """"""
+  methodMax: String
+}
+
+""""""
+enum UserRoleHasFilter {
+  """"""
+  id
+
+  """"""
+  user
+
+  """"""
+  team
+
+  """"""
+  role
+
+  """"""
+  created
+
+  """"""
+  modified
+
+  """"""
+  disabled
+}
+
+""""""
+input PropertiesFilter {
+  """"""
+  name: StringFullTextFilter_StringTermFilter
+
+  """"""
+  value: StringFullTextFilter_StringTermFilter
+
+  """"""
+  has: [PropertiesHasFilter]
+
+  """"""
+  and: [PropertiesFilter]
+
+  """"""
+  or: [PropertiesFilter]
+
+  """"""
+  not: PropertiesFilter
+}
+
+"""BoM Service"""
+type BomService {
+  """Unique Reference in this BoM"""
+  bomRef: String!
+
+  """Group"""
+  group: String!
+
+  """Service name"""
+  name: String!
+
+  """Service version"""
+  version: String!
+
+  """Description"""
+  description: String
+
+  """List of endpoints"""
   endpoints: [String]
 
-  """"""
+  """Boolean to indicate if this endpoint is authenticated"""
   authenticated: Boolean
 
-  """"""
+  """Boolean to indicate if this service is cross boundary"""
   xTrustBoundary: Boolean
 
-  """"""
+  """List of service data"""
   data(filter: BomServiceDataFilter, order: BomServiceDataOrder, first: Int, offset: Int): [BomServiceData]
 
-  """"""
+  """List of component licenses"""
   licenses(filter: ComponentLicenseFilter, order: ComponentLicenseOrder, first: Int, offset: Int): [ComponentLicense]
 
-  """"""
+  """List of services"""
   services(filter: BomServiceFilter, order: BomServiceOrder, first: Int, offset: Int): [BomService]
 
-  """"""
+  """List of properties"""
   properties(filter: PropertiesFilter, order: PropertiesOrder, first: Int, offset: Int): [Properties]
 
   """"""
@@ -6137,30 +6610,90 @@ type BomService {
 }
 
 """"""
-type UpdateComponentLicensePayload {
+type AddVulnerabilityDetailPayload {
   """"""
-  componentLicense(filter: ComponentLicenseFilter, order: ComponentLicenseOrder, first: Int, offset: Int): [ComponentLicense]
+  vulnerabilityDetail(filter: VulnerabilityDetailFilter, order: VulnerabilityDetailOrder, first: Int, offset: Int): [VulnerabilityDetail]
 
   """"""
   numUids: Int
 }
 
 """"""
-input ApplicationOrder {
+enum VulnerabilityVersionStatusOrderable {
   """"""
-  asc: ApplicationOrderable
+  version
 
   """"""
-  desc: ApplicationOrderable
+  versionType
 
   """"""
-  then: ApplicationOrder
+  repo
+
+  """"""
+  lessThanOrEqual
+
+  """"""
+  lessThan
 }
 
 """"""
-type PointList {
+input BomMetadataFilter {
   """"""
-  points: [Point!]!
+  timestamp: DateTimeFilter
+
+  """"""
+  has: [BomMetadataHasFilter]
+
+  """"""
+  and: [BomMetadataFilter]
+
+  """"""
+  or: [BomMetadataFilter]
+
+  """"""
+  not: BomMetadataFilter
+}
+
+""""""
+type MultiPolygon {
+  """"""
+  polygons: [Polygon!]!
+}
+
+""""""
+type UpdateVulnerabilityDetailPayload {
+  """"""
+  vulnerabilityDetail(filter: VulnerabilityDetailFilter, order: VulnerabilityDetailOrder, first: Int, offset: Int): [VulnerabilityDetail]
+
+  """"""
+  numUids: Int
+}
+
+""""""
+type UpdateVulnerabilityVersionChangesPayload {
+  """"""
+  vulnerabilityVersionChanges(filter: VulnerabilityVersionChangesFilter, order: VulnerabilityVersionChangesOrder, first: Int, offset: Int): [VulnerabilityVersionChanges]
+
+  """"""
+  numUids: Int
+}
+
+""""""
+type VulnerabilityAnalysisAggregateResult {
+  """"""
+  count: Int
+
+  """"""
+  stateMin: String
+
+  """"""
+  stateMax: String
+
+  """"""
+  detailMin: String
+
+  """"""
+  detailMax: String
 }
 
 """"""
@@ -6227,225 +6760,138 @@ enum VulnerabilityDetailHasFilter {
 }
 
 """"""
-type UpdateVulnerabilityAdvisoryPayload {
-  """"""
-  vulnerabilityAdvisory(filter: VulnerabilityAdvisoryFilter, order: VulnerabilityAdvisoryOrder, first: Int, offset: Int): [VulnerabilityAdvisory]
-
-  """"""
-  numUids: Int
-}
-
-""""""
-input StringHashFilter_StringRegExpFilter_StringTermFilter {
-  """"""
-  eq: String
-
-  """"""
-  in: [String]
-
-  """"""
-  regexp: String
-
-  """"""
-  allofterms: String
-
-  """"""
-  anyofterms: String
-}
-
-""""""
-input VulnerabilityAdvisoryRef {
-  """"""
-  title: String
-
-  """"""
-  url: String
-}
-
-""""""
-type ScanResult {
-  """"""
+input AddScanResultInput {
+  """Unique ID such as UUID or ULID"""
   id: String!
 
   """"""
-  scan(filter: ScanFilter): Scan
+  scan: ScanRef
 
-  """"""
-  created: DateTime
+  """Creation date"""
+  created: DateTime!
 
-  """"""
+  """Optional, validity for result before it is considered stale"""
   validUntil: DateTime
 
   """"""
-  bom(filter: BomFilter, order: BomOrder, first: Int, offset: Int): [Bom]
+  bom: [BomRef]
 
   """"""
-  components(filter: ComponentFilter, order: ComponentOrder, first: Int, offset: Int): [Component]
+  components: [ComponentRef]
 
   """"""
-  vulnerabilities(filter: VulnerabilityFilter, order: VulnerabilityOrder, first: Int, offset: Int): [Vulnerability]
+  vulnerabilities: [VulnerabilityRef]
 
   """"""
-  prioritizedComponents(filter: ComponentFilter, order: ComponentOrder, first: Int, offset: Int): [Component]
+  prioritizedComponents: [ComponentRef]
 
   """"""
-  prioritizedVulnerabilities(filter: VulnerabilityFilter, order: VulnerabilityOrder, first: Int, offset: Int): [Vulnerability]
+  prioritizedVulnerabilities: [VulnerabilityRef]
 
   """"""
-  exploitableComponents(filter: ComponentFilter, order: ComponentOrder, first: Int, offset: Int): [Component]
+  exploitableComponents: [ComponentRef]
 
   """"""
-  exploitableVulnerabilities(filter: VulnerabilityFilter, order: VulnerabilityOrder, first: Int, offset: Int): [Vulnerability]
+  exploitableVulnerabilities: [VulnerabilityRef]
 
   """"""
-  ignoredComponents(filter: ComponentFilter, order: ComponentOrder, first: Int, offset: Int): [Component]
+  ignoredComponents: [ComponentRef]
 
   """"""
-  ignoredVulnerabilities(filter: VulnerabilityFilter, order: VulnerabilityOrder, first: Int, offset: Int): [Vulnerability]
+  ignoredVulnerabilities: [VulnerabilityRef]
 
-  """"""
+  """Direct url for this scan result"""
   url: String
 
-  """"""
+  """Direct html report url for this scan result"""
   htmlUrl: String
 
-  """"""
+  """Direct csv report url for this scan result"""
   csvUrl: String
 
-  """"""
+  """Direct pdf report url for this scan result"""
   pdfUrl: String
-
-  """"""
-  bomAggregate(filter: BomFilter): BomAggregateResult
-
-  """"""
-  componentsAggregate(filter: ComponentFilter): ComponentAggregateResult
-
-  """"""
-  vulnerabilitiesAggregate(filter: VulnerabilityFilter): VulnerabilityAggregateResult
-
-  """"""
-  prioritizedComponentsAggregate(filter: ComponentFilter): ComponentAggregateResult
-
-  """"""
-  prioritizedVulnerabilitiesAggregate(filter: VulnerabilityFilter): VulnerabilityAggregateResult
-
-  """"""
-  exploitableComponentsAggregate(filter: ComponentFilter): ComponentAggregateResult
-
-  """"""
-  exploitableVulnerabilitiesAggregate(filter: VulnerabilityFilter): VulnerabilityAggregateResult
-
-  """"""
-  ignoredComponentsAggregate(filter: ComponentFilter): ComponentAggregateResult
-
-  """"""
-  ignoredVulnerabilitiesAggregate(filter: VulnerabilityFilter): VulnerabilityAggregateResult
 }
 
 """"""
-type UpdatePropertiesPayload {
-  """"""
-  properties(filter: PropertiesFilter, order: PropertiesOrder, first: Int, offset: Int): [Properties]
+input BomServiceRef {
+  """Unique Reference in this BoM"""
+  bomRef: String
 
-  """"""
-  numUids: Int
-}
+  """Group"""
+  group: String
 
-""""""
-type Component {
-  """"""
-  isRoot: Boolean
+  """Service name"""
+  name: String
 
-  """"""
-  bomRef: String!
+  """Service version"""
+  version: String
 
-  """"""
-  group: String!
-
-  """"""
-  name: String!
-
-  """"""
+  """Description"""
   description: String
 
-  """"""
-  ctype: String
+  """List of endpoints"""
+  endpoints: [String]
+
+  """Boolean to indicate if this endpoint is authenticated"""
+  authenticated: Boolean
+
+  """Boolean to indicate if this service is cross boundary"""
+  xTrustBoundary: Boolean
 
   """"""
-  subPath: String
+  data: [BomServiceDataRef]
 
   """"""
-  repoUrl: String
+  licenses: [ComponentLicenseRef]
 
   """"""
-  downloadUrl: String
+  services: [BomServiceRef]
 
   """"""
-  publisher: String
-
-  """"""
-  licenses(filter: ComponentLicenseFilter, order: ComponentLicenseOrder, first: Int, offset: Int): [ComponentLicense]
-
-  """"""
-  scope: String
-
-  """"""
-  version: String!
-
-  """"""
-  purl: String!
-
-  """"""
-  vulnerabilities(filter: VulnerabilityFilter, order: VulnerabilityOrder, first: Int, offset: Int): [Vulnerability]
-
-  """"""
-  properties(filter: PropertiesFilter, order: PropertiesOrder, first: Int, offset: Int): [Properties]
-
-  """"""
-  dependency(filter: ComponentFilter, order: ComponentOrder, first: Int, offset: Int): [Component]
-
-  """"""
-  appearsIn(filter: BomFilter, order: BomOrder, first: Int, offset: Int): [Bom]
-
-  """"""
-  licensesAggregate(filter: ComponentLicenseFilter): ComponentLicenseAggregateResult
-
-  """"""
-  vulnerabilitiesAggregate(filter: VulnerabilityFilter): VulnerabilityAggregateResult
-
-  """"""
-  propertiesAggregate(filter: PropertiesFilter): PropertiesAggregateResult
-
-  """"""
-  dependencyAggregate(filter: ComponentFilter): ComponentAggregateResult
-
-  """"""
-  appearsInAggregate(filter: BomFilter): BomAggregateResult
+  properties: [PropertiesRef]
 }
 
 """"""
-type AddScanPayload {
+input UpdateBomServiceInput {
   """"""
-  scan(filter: ScanFilter, order: ScanOrder, first: Int, offset: Int): [Scan]
+  filter: BomServiceFilter!
 
   """"""
-  numUids: Int
+  set: BomServicePatch
+
+  """"""
+  remove: BomServicePatch
+}
+
+"""Properties"""
+type Properties {
+  """Property name"""
+  name: String!
+
+  """Property value"""
+  value: String!
 }
 
 """"""
-type AddVulnerabilityAdvisoryPayload {
+input GenerateQueryParams {
   """"""
-  vulnerabilityAdvisory(filter: VulnerabilityAdvisoryFilter, order: VulnerabilityAdvisoryOrder, first: Int, offset: Int): [VulnerabilityAdvisory]
+  get: Boolean
 
   """"""
-  numUids: Int
+  query: Boolean
+
+  """"""
+  password: Boolean
+
+  """"""
+  aggregate: Boolean
 }
 
 """"""
-type DeleteVulnerabilityDetailPayload {
+type DeleteBomPayload {
   """"""
-  vulnerabilityDetail(filter: VulnerabilityDetailFilter, order: VulnerabilityDetailOrder, first: Int, offset: Int): [VulnerabilityDetail]
+  bom(filter: BomFilter, order: BomOrder, first: Int, offset: Int): [Bom]
 
   """"""
   msg: String
@@ -6455,333 +6901,30 @@ type DeleteVulnerabilityDetailPayload {
 }
 
 """"""
-enum VulnerabilityRatingOrderable {
+type AddVulnerabilityVersionChangesPayload {
   """"""
-  score
-
-  """"""
-  method
-}
-
-""""""
-input UpdateBomServiceDataInput {
-  """"""
-  filter: BomServiceDataFilter!
-
-  """"""
-  set: BomServiceDataPatch
-
-  """"""
-  remove: BomServiceDataPatch
-}
-
-""""""
-type UserRole {
-  """"""
-  id: String!
-
-  """"""
-  user(filter: UserFilter): User!
-
-  """"""
-  team(filter: TeamFilter): Team!
-
-  """"""
-  role: String!
-
-  """"""
-  created: DateTime
-
-  """"""
-  modified: DateTime
-
-  """"""
-  disabled: Boolean
-}
-
-""""""
-input VulnerabilityAnalysisRef {
-  """"""
-  state: String
-
-  """"""
-  detail: String
-}
-
-""""""
-input VulnerabilityRatingOrder {
-  """"""
-  asc: VulnerabilityRatingOrderable
-
-  """"""
-  desc: VulnerabilityRatingOrderable
-
-  """"""
-  then: VulnerabilityRatingOrder
-}
-
-""""""
-type UpdateScanPayload {
-  """"""
-  scan(filter: ScanFilter, order: ScanOrder, first: Int, offset: Int): [Scan]
+  vulnerabilityVersionChanges(filter: VulnerabilityVersionChangesFilter, order: VulnerabilityVersionChangesOrder, first: Int, offset: Int): [VulnerabilityVersionChanges]
 
   """"""
   numUids: Int
 }
 
 """"""
-type UpdateVulnerabilityAnalysisPayload {
+type DeleteComponentLicensePayload {
   """"""
-  vulnerabilityAnalysis(filter: VulnerabilityAnalysisFilter, order: VulnerabilityAnalysisOrder, first: Int, offset: Int): [VulnerabilityAnalysis]
+  componentLicense(filter: ComponentLicenseFilter, order: ComponentLicenseOrder, first: Int, offset: Int): [ComponentLicense]
+
+  """"""
+  msg: String
 
   """"""
   numUids: Int
 }
 
 """"""
-input AddUserInput {
-  """"""
-  id: String!
-
-  """"""
-  email: String!
-
-  """"""
-  fullName: String!
-
-  """"""
-  created: DateTime
-
-  """"""
-  modified: DateTime
-
-  """"""
-  teams: [TeamRef]
-
-  """"""
-  roles: [UserRoleRef]
-
-  """"""
-  disabled: Boolean
-
-  """"""
-  password: String!
-}
-
-""""""
-input UpdateUserRoleInput {
-  """"""
-  filter: UserRoleFilter!
-
-  """"""
-  set: UserRolePatch
-
-  """"""
-  remove: UserRolePatch
-}
-
-""""""
-input VulnerabilityDetailPatch {
-  """"""
-  vulnerability: VulnerabilityRef
-
-  """"""
-  title: String
-
-  """"""
-  summary: String
-
-  """"""
-  datePublic: DateTime
-
-  """"""
-  collectionURL: String
-
-  """"""
-  defaultStatus: String
-
-  """"""
-  descriptions: [String]
-
-  """"""
-  modules: [String]
-
-  """"""
-  programFiles: [String]
-
-  """"""
-  programRoutines: [String]
-
-  """"""
-  platforms: [String]
-
-  """"""
-  versions: [VulnerabilityVersionStatusRef]
-
-  """"""
-  solutions: [String]
-
-  """"""
-  workarounds: [String]
-
-  """"""
-  configurations: [String]
-
-  """"""
-  exploits: [String]
-
-  """"""
-  timeline: [String]
-
-  """"""
-  credits: [String]
-
-  """"""
-  references: [String]
-
-  """"""
-  source: String
-}
-
-""""""
-type Properties {
-  """"""
-  name: String!
-
-  """"""
-  value: String!
-}
-
-""""""
-type AddVulnerabilityRatingPayload {
-  """"""
-  vulnerabilityRating(filter: VulnerabilityRatingFilter, order: VulnerabilityRatingOrder, first: Int, offset: Int): [VulnerabilityRating]
-
-  """"""
-  numUids: Int
-}
-
-""""""
-input AddApplicationInput {
-  """"""
-  id: String!
-
-  """"""
-  name: String!
-
-  """"""
-  description: String
-
-  """"""
-  environment: EnvironmentRef
-
-  """"""
-  version: ApplicationVersionRef
-
-  """"""
-  repoUrl: String
-
-  """"""
-  issuesUrl: String
-
-  """"""
-  ciUrl: String
-
-  """"""
-  cdUrl: String
-
-  """"""
-  changeManagementUrl: String
-
-  """"""
-  languages: [String]
-
-  """"""
-  frameworks: [String]
-
-  """"""
-  classification: [String]
-
-  """"""
-  tags: [String]
-
-  """"""
-  created: DateTime
-
-  """"""
-  modified: DateTime
-
-  """"""
-  teams: [TeamRef]
-
-  """"""
-  disabled: Boolean
-}
-
-""""""
-input BomMetadataRef {
-  """"""
-  timestamp: DateTime
-
-  """"""
-  component: ComponentRef
-}
-
-""""""
-input EnvironmentPatch {
-  """"""
-  name: String
-
-  """"""
-  description: String
-
-  """"""
-  tags: [String]
-
-  """"""
-  url: String
-
-  """"""
-  users: [UserRef]
-
-  """"""
-  teams: [TeamRef]
-}
-
-""""""
-input VulnerabilityVersionChangesRef {
-  """"""
-  at: String
-
-  """"""
-  status: VulnerabilityVersionStatusEnum
-}
-
-""""""
-input AuthRule {
-  """"""
-  and: [AuthRule]
-
-  """"""
-  or: [AuthRule]
-
-  """"""
-  not: AuthRule
-
-  """"""
-  rule: String
-}
-
-""""""
-type VulnerabilityAggregateResult {
+type TeamAggregateResult {
   """"""
   count: Int
-
-  """"""
-  bomRefMin: String
-
-  """"""
-  bomRefMax: String
 
   """"""
   idMin: String
@@ -6790,16 +6933,10 @@ type VulnerabilityAggregateResult {
   idMax: String
 
   """"""
-  cvss_scoreMin: Float
+  nameMin: String
 
   """"""
-  cvss_scoreMax: Float
-
-  """"""
-  cvss_scoreSum: Float
-
-  """"""
-  cvss_scoreAvg: Float
+  nameMax: String
 
   """"""
   descriptionMin: String
@@ -6808,143 +6945,65 @@ type VulnerabilityAggregateResult {
   descriptionMax: String
 
   """"""
-  recommendationMin: String
+  createdMin: DateTime
 
   """"""
-  recommendationMax: String
+  createdMax: DateTime
 
   """"""
-  versionMin: String
+  modifiedMin: DateTime
 
   """"""
-  versionMax: String
-
-  """"""
-  fix_versionMin: String
-
-  """"""
-  fix_versionMax: String
+  modifiedMax: DateTime
 }
 
 """"""
-enum BomMetadataHasFilter {
+enum VulnerabilityAdvisoryHasFilter {
   """"""
-  timestamp
+  title
 
   """"""
-  component
+  url
 }
 
 """"""
-input UpdateVulnerabilityAnalysisInput {
+input VulnerabilityAdvisoryFilter {
   """"""
-  filter: VulnerabilityAnalysisFilter!
+  title: StringTermFilter
 
   """"""
-  set: VulnerabilityAnalysisPatch
+  has: [VulnerabilityAdvisoryHasFilter]
 
   """"""
-  remove: VulnerabilityAnalysisPatch
+  and: [VulnerabilityAdvisoryFilter]
+
+  """"""
+  or: [VulnerabilityAdvisoryFilter]
+
+  """"""
+  not: VulnerabilityAdvisoryFilter
 }
 
 """"""
-input UserOrder {
+input VulnerabilityOrder {
   """"""
-  asc: UserOrderable
+  asc: VulnerabilityOrderable
 
   """"""
-  desc: UserOrderable
+  desc: VulnerabilityOrderable
 
   """"""
-  then: UserOrder
+  then: VulnerabilityOrder
 }
 
 """"""
-input VulnerabilityVersionStatusPatch {
-  """"""
-  version: String
+input VulnerabilityRatingRef {
+  """Severity such as critical, high"""
+  severity: Severity
 
-  """"""
-  versionType: String
+  """Score"""
+  score: Float
 
-  """"""
-  repo: String
-
-  """"""
-  lessThanOrEqual: String
-
-  """"""
-  lessThan: String
-
-  """"""
-  changes: [VulnerabilityVersionChangesRef]
-
-  """"""
-  status: VulnerabilityVersionStatusEnum
-}
-
-""""""
-input NearFilter {
-  """"""
-  distance: Float!
-
-  """"""
-  coordinate: PointRef!
-}
-
-""""""
-enum ApplicationHasFilter {
-  """"""
-  id
-
-  """"""
-  name
-
-  """"""
-  description
-
-  """"""
-  environment
-
-  """"""
-  version
-
-  """"""
-  repoUrl
-
-  """"""
-  issuesUrl
-
-  """"""
-  ciUrl
-
-  """"""
-  cdUrl
-
-  """"""
-  changeManagementUrl
-
-  """"""
-  languages
-
-  """"""
-  frameworks
-
-  """"""
-  classification
-
-  """"""
-  tags
-
-  """"""
-  created
-
-  """"""
-  modified
-
-  """"""
-  teams
-
-  """"""
-  disabled
+  """Method used to determine the score"""
+  method: String
 }
