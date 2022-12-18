@@ -31,6 +31,10 @@ List of roles
 """
     roles: [UserRole]
 """
+Is this a bot user for automation?
+"""
+    isBot: Boolean
+"""
 Is this user account disabled?
 """
     disabled: Boolean
@@ -115,7 +119,13 @@ Is this role disabled?
 """
 Results from a scan
 """
-type ScanResult @withSubscription {
+type ScanResult @generate(
+    mutation: {
+        add: true,
+        delete: false
+    },
+    subscription: true
+) {
 """
 Unique ID such as UUID or ULID
 """
@@ -189,7 +199,13 @@ Direct pdf report url for this scan result
 """
 Scan of an application
 """
-type Scan {
+type Scan @generate(
+    mutation: {
+        add: true,
+        delete: false
+    },
+    subscription: false
+) {
 """
 Unique ID such as UUID or ULID
 """
@@ -287,7 +303,13 @@ VCS Commit Hash
 """
 Represents an application
 """
-type Application @withSubscription {
+type Application @generate(
+    mutation: {
+        add: true,
+        delete: false
+    },
+    subscription: true
+) {
 """
 Unique ID such as UUID or ULID
 """
@@ -352,6 +374,10 @@ Creation date
 Modified date
 """
     modified: DateTime! @search
+"""
+For application groups, there could be dependent sub-applications
+"""
+    subApplications: [Application]
 """
 List of teams
 """
@@ -572,7 +598,13 @@ List of properties
 """
 Bom type
 """
-type Bom {
+type Bom @generate(
+    mutation: {
+        add: true,
+        delete: false
+    },
+    subscription: false
+) {
 """
 Serial number
 """
@@ -805,7 +837,9 @@ Details for the state
 """
 Vulnerability type
 """
-type Vulnerability @withSubscription {
+type Vulnerability @generate(
+    subscription: true
+) {
 """
 Unique reference within a BoM
 """

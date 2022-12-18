@@ -1,3 +1,32 @@
+
+## Aggregate queries
+
+Count of BoM, Component and Vulnerability
+
+```
+query {
+  aggregateBom {
+    count
+  }
+}
+```
+
+```
+query {
+  aggregateComponent {
+    count
+  }
+}
+```
+
+```
+query {
+  aggregateVulnerability {
+    count
+  }
+}
+```
+
 # Get component by purl
 
 ```
