@@ -70,3 +70,7 @@ curl -F 'file=@/tmp/bom.json' http://0.0.0.0:9000/import -H "Authorization: Bear
 ## Cloud Setup
 
 Refer to the instructions under [contrib](contrib/microk8s/INSTALL.md) to setup a microk8s cluster with threat-db and dgraph.
+
+## Discord support
+
+The developers could be reached via the [discord](https://discord.gg/DCNxzaeUpd) channel.
