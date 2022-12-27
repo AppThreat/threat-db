@@ -32,18 +32,18 @@ def cleanup_license_string(license_str):
 def get_pkg_vulns_json(jsonfile):
     """Method to extract packages from a bom json file"""
     if not os.path.exists(jsonfile):
-        return None, None, None, None
+        return {}
     with open(jsonfile) as fp:
         try:
             bom_data = orjson.loads(fp.read())
             if bom_data:
                 return get_pkg_vulns_from_bom(bom_data)
         except Exception:
-            return None, None, None, None
+            return {}
 
 
 def get_pkg_vulns_from_bom(bom_data):
-    pkgs = []
+    components = []
     serial_number = None
     metadata = {}
     metadata = bom_data.get("metadata")
@@ -94,7 +94,7 @@ def get_pkg_vulns_from_bom(bom_data):
                 "appearsIn": [{"serialNumber": serial_number}],
             }
             del fcomp["bom-ref"]
-            pkgs.append(fcomp)
+            components.append(fcomp)
         for avuln in bom_data.get("vulnerabilities", []):
             bomRef = avuln.get("bom-ref")
             if added_vkeys.get(bomRef):
@@ -128,7 +128,14 @@ def get_pkg_vulns_from_bom(bom_data):
             del fvuln["bom-ref"]
             vulnerabilities.append(fvuln)
             added_vkeys[bomRef] = True
-    return (serial_number, metadata, pkgs, vulnerabilities)
+    return {
+        "serial_number": serial_number,
+        "metadata": metadata,
+        "components": components,
+        "services": bom_data.get("services", []),
+        "vulnerabilities": vulnerabilities,
+        "bom_data": bom_data,
+    }
 
 
 def process_vex(client, data_dir, remove_on_success=False):
@@ -140,23 +147,20 @@ def process_vex(client, data_dir, remove_on_success=False):
 
 
 def process_vex_file(client, jsonf):
+    parsed_obj = {}
     if isinstance(jsonf, SpooledTemporaryFile):
         try:
-            (
-                serial_number,
-                metadata,
-                components,
-                vulnerabilities,
-            ) = get_pkg_vulns_from_bom(orjson.loads(jsonf.read()))
+            parsed_obj = get_pkg_vulns_from_bom(orjson.loads(jsonf.read()))
         except Exception as ex:
             LOG.warn("Exception while converting to json from tempfile")
             LOG.exception(ex)
             return False
     else:
         LOG.debug(f"Processing {jsonf}")
-        (serial_number, metadata, components, vulnerabilities) = get_pkg_vulns_json(
-            jsonf
-        )
+        parsed_obj = get_pkg_vulns_json(jsonf)
+    serial_number = parsed_obj.get("serial_number")
+    components = parsed_obj.get("components")
+    metadata = parsed_obj.get("metadata")
     if serial_number and components:
         LOG.info(f"Creating Bom with {len(components)} components from {jsonf}")
         root_component = metadata.get("component", None)
@@ -175,7 +179,8 @@ def process_vex_file(client, jsonf):
                         "component": root_component,
                     },
                     "components": components,
-                    "vulnerabilities": vulnerabilities,
+                    "services": parsed_obj.get("services"),
+                    "vulnerabilities": parsed_obj.get("vulnerabilities"),
                 }
             ],
         )

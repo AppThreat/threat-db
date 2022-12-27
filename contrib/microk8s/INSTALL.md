@@ -186,7 +186,7 @@ dev-db-dgraph-zero-2    1/1     Running   0          29m
 dev-db-dgraph-alpha-2   1/1     Running   0          29m
 ```
 
-````
+```
 $ microk8s kubectl get service
 NAME                           TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)             AGE
 kubernetes                     ClusterIP   10.152.183.1     <none>        443/TCP             52m
@@ -397,4 +397,4 @@ Check pod limits
 microk8s kubectl get pods dev-db-dgraph-zero-0 -o jsonpath='{range .spec.containers[*]}{"Container Name: "}{.name}{"\n"}{"Requests:"}{.resources.requests}{"\n"}{"Limits:"}{.resources.limits}{"\n"}{end}'
 ```
 
-````
+
