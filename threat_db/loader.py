@@ -163,7 +163,9 @@ def process_vex_file(client, jsonf):
     metadata = parsed_obj.get("metadata")
     services = parsed_obj.get("services")
     if serial_number and components:
-        LOG.info(f"Creating Bom with {len(components)} components and {len(services)} services from {jsonf}")
+        LOG.info(
+            f"Creating Bom with {len(components)} components and {len(services)} services from {jsonf}"
+        )
         root_component = metadata.get("component", None)
         if root_component and root_component.get("purl"):
             root_component["isRoot"] = True
