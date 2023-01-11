@@ -131,8 +131,12 @@ def main():
                         f"An administrator user was created with the id {user_id} and password {password}"
                     )
                     LOG.info(
-                        """Use this credential for development purposes only and ensure this account is removed in production.\nTo generate access token for this user, make a POST request to the /login endpoint\n\nexport ACCESS_TOKEN=$(curl -q -X POST http://0.0.0.0:9000/login -d '{"username":"%(user_id)s","password":"%(password)s"}' -H "Content-Type: application/json" | jq -r '.access_token')"""
-                        % dict(user_id=user_id, password=password)
+                        """Use this credential for development purposes only and ensure this account is removed in production.\nTo generate access token for this user, make a POST request to the /login endpoint\n\nexport ACCESS_TOKEN=$(curl -q -X POST %(graphql_host)s/login -d '{"username":"%(user_id)s","password":"%(password)s"}' -H "Content-Type: application/json" | jq -r '.access_token')"""
+                        % dict(
+                            user_id=user_id,
+                            password=password,
+                            graphql_host=args.graphql_host,
+                        )
                     )
                 else:
                     LOG.info(f"Unable to authenticate as the new user {user_id}")
