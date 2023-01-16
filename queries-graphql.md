@@ -189,6 +189,72 @@ query {
 }
 ```
 
+# Bom with services
+
+```
+query {
+  getBom(serialNumber: "urn:uuid:d1424c23-a5d8-4be4-850d-8004c27680de") {
+    serialNumber,
+    metadata {
+      timestamp
+      component {
+        name
+        group
+        purl
+      }
+    }
+    services {
+      name
+      version
+      data {
+        flow
+        classification
+      }
+      authenticated
+      xTrustBoundary
+      endpoints
+      properties {
+        name
+        value
+      }
+    }
+  }
+}
+```
+
+# Bom with services and data
+
+```
+query {
+  queryBom(filter: {has: services}) {
+    serialNumber,
+    metadata {
+      timestamp
+      component {
+        name
+        group
+        purl
+      }
+    }
+    services(filter: {has: data}) {
+      name
+      version
+      data {
+        flow
+        classification
+      }
+      authenticated
+      xTrustBoundary
+      endpoints
+      properties {
+        name
+        value
+      }
+    }
+  }
+}
+```
+
 # Query by severity
 
 ```
@@ -209,7 +275,7 @@ query {
 }
 ```
 
-Query by cvss_score and order by score in descending
+# Query by cvss_score and order by score in descending
 
 ```
 query {
@@ -229,7 +295,7 @@ query {
 }
 ```
 
-For components with critical and high vulnerabilities, list other vulnerabilities
+# For components with critical and high vulnerabilities, list other vulnerabilities
 
 ```
 query {
@@ -257,7 +323,7 @@ query {
 }
 ```
 
-Same as above with a vulnerability filter
+# Same as above with a vulnerability filter
 
 ```
 query {
@@ -285,7 +351,7 @@ query {
 }
 ```
 
-Components with Vulnerabilities prioritized
+# Components with Vulnerabilities prioritized
 
 ```
 query {
@@ -323,7 +389,7 @@ query {
 }
 ```
 
-Components with Vulnerabilities prioritized and exploits
+# Components with Vulnerabilities prioritized and exploits
 
 ```
 query {
@@ -365,7 +431,7 @@ query {
 }
 ```
 
-Components with critical and high exploitable vulnerabilities
+# Components with critical and high exploitable vulnerabilities
 
 ```
 query {
@@ -402,7 +468,7 @@ query {
 }
 ```
 
-Subscribing to new vulnerabilities
+# Subscribing to new vulnerabilities
 
 ```
 subscription subscribeVulnerability {
@@ -414,7 +480,7 @@ subscription subscribeVulnerability {
 }
 ```
 
-Find BoMs between two dates
+# Find BoMs between two dates
 
 ```
 query {
