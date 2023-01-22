@@ -3,5 +3,5 @@
 Install threat-db API server via helm charts
 
 ```
-helm install threat-db oci://ghcr.io/ngcloudsec/charts/threat-db --version 0.5.0
+helm install threat-db oci://ghcr.io/appthreat/charts/threat-db --version 0.5.0
 ```

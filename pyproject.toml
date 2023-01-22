@@ -2,7 +2,7 @@
 name = "threat-db"
 version = "0.6.2"
 description = "A graphql server for vulnerabilities powered by dgraph"
-authors = ["Team ngcloudsec <cloud@ngcloud.io>"]
+authors = ["Team AppThreat <cloud@appthreat.com>"]
 license = "Apache-2.0"
 readme = "README.md"
 packages = [{include = "threat_db"}]

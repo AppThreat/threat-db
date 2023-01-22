@@ -4,7 +4,7 @@ metadata:
   name: threat-db
 build:
   artifacts:
-  - image: ngcloudsec/threat-db
+  - image: appthreat/threat-db
     docker:
       dockerfile: Dockerfile
 deploy:

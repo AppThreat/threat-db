@@ -5,7 +5,7 @@ ThreatDB is a graph database for application components and vulnerabilities powe
 ## Development setup
 
 ```
-git clone https://github.com/ngcloudsec/threat-db.git
+git clone https://github.com/appthreat/threat-db.git
 cd threat-db
 mkdir -p $HOME/dgraph $HOME/threatdb_data_dir
 docker compose up
@@ -18,7 +18,7 @@ This would start a threat db api server (PORT: 9000) and an instance of [dgraph]
 To create the schemas and the first administrator user.
 
 ```
-git clone https://github.com/ngcloudsec/threat-db.git
+git clone https://github.com/appthreat/threat-db.git
 pip install poetry
 poetry install
 export DGRAPH_API_KEY=changeme
@@ -35,7 +35,7 @@ mkdir -p $HOME/threatdb_data_dir
 threat_db --data-dir $HOME/threatdb_data_dir
 ```
 
-When invoked with docker compose, any .vex.json files present in the directory `THREATDB_DATA_DIR` would be imported automatically. For testing purposes, you can download some sample VEX files from [here](https://github.com/ngcloudsec/images-info/actions/workflows/build.yml)
+When invoked with docker compose, any .vex.json files present in the directory `THREATDB_DATA_DIR` would be imported automatically. For testing purposes, you can download some sample VEX files from [here](https://github.com/appthreat/images-info/actions/workflows/build.yml)
 
 ## Rest API
 

@@ -39,9 +39,9 @@ jobs:
       - name: Release Helm package
         run: |
           cd contrib/helm/threat-db
-          echo ${{ secrets.GITHUB_TOKEN }} | helm registry login -u ${GITHUB_USERNAME} --password-stdin ghcr.io/ngcloudsec/charts
+          echo ${{ secrets.GITHUB_TOKEN }} | helm registry login -u ${GITHUB_USERNAME} --password-stdin ghcr.io/appthreat/charts
           helm package .
-          helm push threat-db-*.tgz oci://ghcr.io/ngcloudsec/charts
+          helm push threat-db-*.tgz oci://ghcr.io/appthreat/charts
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_USERNAME: ${{ github.actor }}

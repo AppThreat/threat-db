@@ -6,7 +6,7 @@ replicaCount: 1
 
 image: &image
   registry: ghcr.io
-  repository: ngcloudsec/threat-db
+  repository: appthreat/threat-db
   pullPolicy: Always
   # Overrides the image tag whose default is the chart appVersion.
   tag: main
