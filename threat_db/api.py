@@ -49,8 +49,9 @@ def allowed_file(filename):
 
 @app.route("/login", methods=["POST"])
 def login():
-    user_id = request.json.get("username", None)
-    password = request.json.get("password", None)
+    login_data = request.json or {}
+    user_id = login_data.get("username", None)
+    password = login_data.get("password", None)
     try:
         auth_res = graph_client.auth_user(client, user_id, password)
         if auth_res:
