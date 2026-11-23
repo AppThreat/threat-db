@@ -9,6 +9,7 @@ def test_get_pkg_vulns():
             os.path.dirname(__file__), "data", "NodeGoat", "sbom-nodejs.vex.json"
         )
     )
+    assert parsed_obj is not None
     assert (
         parsed_obj["serial_number"] == "urn:uuid:25223366-1379-41f4-8abf-3a4e11d6548f"
     )
@@ -22,6 +23,7 @@ def test_get_pkg_vulns():
             os.path.dirname(__file__), "data", "NodeGoat", "sbom-yaml-manifest.vex.json"
         )
     )
+    assert parsed_obj is not None
     assert (
         parsed_obj["serial_number"] == "urn:uuid:1a1ffcb3-2c26-43af-8032-d312627ab9f8"
     )

@@ -37,9 +37,14 @@ def create_client_stub(host, api_key=None):
     if ":9080" in host:
         return pydgraph.DgraphClientStub(host)
     creds = grpc.ssl_channel_credentials()
-    call_credentials = grpc.metadata_call_credentials(
-        lambda context, callback: callback((("authorization", api_key),), None)
-    )
+
+    class DgraphAuthMetadata(grpc.AuthMetadataPlugin):
+        """Supplies the api key on every call to a TLS secured standalone server."""
+
+        def __call__(self, context, callback):
+            callback((("authorization", api_key or ""),), None)
+
+    call_credentials = grpc.metadata_call_credentials(DgraphAuthMetadata())
     composite_credentials = grpc.composite_channel_credentials(creds, call_credentials)
     return pydgraph.DgraphClientStub(
         host, composite_credentials, options=(("grpc.enable_http_proxy", 0),)

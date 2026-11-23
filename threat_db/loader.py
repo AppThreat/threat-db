@@ -29,7 +29,7 @@ def cleanup_license_string(license_str):
     return license_str.upper()
 
 
-def get_pkg_vulns_json(jsonfile):
+def get_pkg_vulns_json(jsonfile) -> dict:
     """Method to extract packages from a bom json file"""
     if not os.path.exists(jsonfile):
         return {}
@@ -40,9 +40,10 @@ def get_pkg_vulns_json(jsonfile):
                 return get_pkg_vulns_from_bom(bom_data)
         except Exception:
             return {}
+    return {}
 
 
-def get_pkg_vulns_from_bom(bom_data):
+def get_pkg_vulns_from_bom(bom_data) -> dict:
     components = []
     serial_number = None
     metadata = {}
@@ -160,11 +161,11 @@ def process_vex_file(client, jsonf):
         parsed_obj = get_pkg_vulns_json(jsonf)
     serial_number = parsed_obj.get("serial_number")
     components = parsed_obj.get("components")
-    metadata = parsed_obj.get("metadata")
+    metadata = parsed_obj.get("metadata") or {}
     services = parsed_obj.get("services")
     if serial_number and components:
         LOG.info(
-            f"Creating Bom with {len(components)} components and {len(services)} services from {jsonf}"
+            f"Creating Bom with {len(components)} components and {len(services or [])} services from {jsonf}"
         )
         root_component = metadata.get("component", None)
         if root_component and root_component.get("purl"):
@@ -178,7 +179,7 @@ def process_vex_file(client, jsonf):
                 {
                     "serialNumber": serial_number,
                     "metadata": {
-                        "timestamp": metadata.get("timestamp").replace("Z", ""),
+                        "timestamp": (metadata.get("timestamp") or "").replace("Z", ""),
                         "component": root_component,
                     },
                     "components": components,
