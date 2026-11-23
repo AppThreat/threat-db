@@ -1,0 +1,21 @@
+threat_db/api.py
+  s_aaee579a5278f8::t_04096c7f731f63 52-54
+.github/workflows/ci.yml
+  s_aaee579a5278f8::t_fc1899af77a1d8 24-28
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "fefbaff6545a900498bd128f909bfe4c27696467",
+  "prompts": {},
+  "sessions": {
+    "s_aaee579a5278f8": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "sess_5e7ef323-4862-458f-9597-0fa3f73f8197",
+        "model": "GLM-5.3"
+      },
+      "human_author": null
+    }
+  }
+}
