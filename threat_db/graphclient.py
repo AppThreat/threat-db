@@ -34,13 +34,16 @@ headers = {"Content-Type": "application/json", "Accept-Encoding": "gzip"}
 
 # Add access tokens to the requests
 # The kind people at dgraph use several different headers for tokens!
-if os.getenv("DGRAPH_API_KEY"):
-    headers["X-Dgraph-AuthToken"] = os.getenv("DGRAPH_API_KEY")
-    headers["X-Auth-Token"] = os.getenv("DGRAPH_API_KEY")
-if os.getenv("DGRAPH_CLOUD_API_KEY"):
-    headers["Authorization"] = f"""Bearer {os.getenv("DGRAPH_CLOUD_API_KEY")}"""
-if os.getenv("DGRAPH_ACL_KEY"):
-    headers["X-Dgraph-AccessToken"] = os.getenv("DGRAPH_ACL_KEY")
+dgraph_api_key = os.getenv("DGRAPH_API_KEY")
+if dgraph_api_key:
+    headers["X-Dgraph-AuthToken"] = dgraph_api_key
+    headers["X-Auth-Token"] = dgraph_api_key
+dgraph_cloud_api_key = os.getenv("DGRAPH_CLOUD_API_KEY")
+if dgraph_cloud_api_key:
+    headers["Authorization"] = f"""Bearer {dgraph_cloud_api_key}"""
+dgraph_acl_key = os.getenv("DGRAPH_ACL_KEY")
+if dgraph_acl_key:
+    headers["X-Dgraph-AccessToken"] = dgraph_acl_key
 
 
 def catch_db_errors(fn):
@@ -188,6 +191,7 @@ def create_bom(client, bom):
                 else:
                     LOG.exception(tqe)
                     return None
+            return None
         return process_query_response(result)
 
 
